@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -15,7 +15,8 @@
         "url": "https://github.com/vector-wlc/AvZVSCodeExtenson"
     },
     "activationEvents": [
-        "onCommand:AsmVsZombies.runScript"
+        "onCommand:AsmVsZombies.runScript",
+        "onCommand:AsmVsZombies.updateAvz"
     ],
     "keywords": ["avz", "pvz"],
     "icon": "image/avz.ico",
@@ -23,7 +24,10 @@
     "contributes": {
         "commands": [{
             "command": "AsmVsZombies.runScript",
-            "title": "Run Script (AvZ)"
+            "title": "AvZ : Run Script"
+        }, {
+            "command": "AsmVsZombies.updateAvz",
+            "title": "AvZ : Update"
         }],
         "menus": {
             "editor/context": [{

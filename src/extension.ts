@@ -6,55 +6,43 @@
  */
 
 import * as vscode from 'vscode';
+import { Avz } from './avz';
 
-var terminal: vscode.Terminal | undefined;
+
+let avz = new Avz();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	let close_terminal = vscode.window.onDidCloseTerminal(t => {
+	let closeTerminal = vscode.window.onDidCloseTerminal(t => {
 		// Watch for when the server terminal closes.
-		if (t.name === "AvZ") {
-			terminal = undefined;
-		}
+		avz.setTerminalClosed();
 	});
 
-	let disposable = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
-		if (vscode.window.activeTextEditor) {
-			var file_name = vscode.window.activeTextEditor.document.fileName;
-			var workspace_root = vscode.workspace.rootPath
-			if (terminal === undefined) {
-				terminal = vscode.window.createTerminal("AvZ", "cmd");
+	let runScript = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
+		avz.runScript();
+	});
+
+	let updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
+		avz.getAvzVersionList((avzVersionList: string[]) => {
+			if (avzVersionList.length === 0) {
+				return;
 			}
-			// 添加环境变量
-			var cmd = "set PATH=" + workspace_root + "/MinGW/bin; %PATH% && ";
 
-			// 运行编译命令
-			cmd += workspace_root + "/MinGW/bin/g++ ";
-			cmd += file_name;
-			cmd += " -std=c++1z ";
-			cmd += "-I ";
-			cmd += workspace_root + "/inc ";
-			cmd += "-l ";
-			cmd += "avz ";
-			cmd += "-L ";
-			cmd += workspace_root + "/bin ";
-			cmd += "-shared ";
-			cmd += "-o ";
-			cmd += workspace_root + "/bin/libavz.dll && ";
-
-			// 注入
-			cmd += workspace_root + "/bin/injector.exe";
-
-			terminal.sendText(cmd);
-			terminal.show();
-
-		}
+			const options: vscode.QuickPickOptions = {
+				title: "请选择 AvZ 版本"
+			};
+			vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => {
+				if (avzVersion && avzVersion.length !== 0) {
+					avz.setAvzVerison(avzVersion);
+				}
+			});
+		});
 	});
-
-	context.subscriptions.push(disposable);
-	context.subscriptions.push(close_terminal);
+	context.subscriptions.push(runScript);
+	context.subscriptions.push(updateAvz);
+	context.subscriptions.push(closeTerminal);
 }
 
 // this method is called when your extension is deactivated
