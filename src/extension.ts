@@ -17,7 +17,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let closeTerminal = vscode.window.onDidCloseTerminal(t => {
 		// Watch for when the server terminal closes.
-		avz.setTerminalClosed();
+		if (t.name === "AvZ") {
+			avz.setTerminalClosed();
+		}
 	});
 
 	let runScript = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
