@@ -7,6 +7,7 @@
 
 import * as vscode from 'vscode';
 import { Avz } from './avz';
+import * as http from "https"
 
 
 let avz = new Avz();
@@ -42,9 +43,32 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 		});
 	});
+
+	let openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
+		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies")
+	});
+
+	let setAvzDir = vscode.commands.registerCommand('AsmVsZombies.setAvzDir', () => {
+		const options: vscode.OpenDialogOptions = {
+			canSelectFolders: true,
+			canSelectFiles: false,
+			canSelectMany: false,
+			openLabel: '打开 AvZ 安装目录 (Open the AvZ installation directory)'
+		};
+
+		vscode.window.showOpenDialog(options).then(dir => {
+			if (dir && dir[0]) {
+				avz.setAvzDir(dir[0].fsPath);
+			}
+		});
+	});
+
+
 	context.subscriptions.push(runScript);
 	context.subscriptions.push(updateAvz);
 	context.subscriptions.push(closeTerminal);
+	context.subscriptions.push(openAvzTutorial);
+	context.subscriptions.push(setAvzDir);
 }
 
 // this method is called when your extension is deactivated

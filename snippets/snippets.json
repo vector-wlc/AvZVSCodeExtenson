@@ -1,0 +1,15 @@
+{
+    "ast": {
+        "prefix": "AvZ Script Template",
+        "body": [
+            "#include \"avz.h\"",
+            "",
+            "using namespace AvZ;",
+            "",
+            "void Script() {",
+            "    $0",
+            "}"
+        ],
+        "description": "AvZ Script 固定模板"
+    }
+}

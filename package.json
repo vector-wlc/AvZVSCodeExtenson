@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.1.1",
+    "version": "0.2.1",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -16,7 +16,9 @@
     },
     "activationEvents": [
         "onCommand:AsmVsZombies.runScript",
-        "onCommand:AsmVsZombies.updateAvz"
+        "onCommand:AsmVsZombies.updateAvz",
+        "onCommand:AsmVsZombies.openAvzTutorial",
+        "onCommand:AsmVsZombies.setAvzDir"
     ],
     "keywords": ["avz", "pvz"],
     "icon": "image/avz.ico",
@@ -28,6 +30,12 @@
         }, {
             "command": "AsmVsZombies.updateAvz",
             "title": "AvZ : Update"
+        }, {
+            "command": "AsmVsZombies.openAvzTutorial",
+            "title": "AvZ : Open Tutorial"
+        }, {
+            "command": "AsmVsZombies.setAvzDir",
+            "title": "AvZ : Set AvZ Dir"
         }],
         "menus": {
             "editor/context": [{
@@ -35,7 +43,22 @@
                 "command": "AsmVsZombies.runScript",
                 "group": "navigation"
             }]
-        }
+        },
+        "configuration": {
+            "type": "object",
+            "title": "AvZ Configure",
+            "properties": {
+                "avzConfigure.avzDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "AvZ 安装路径 (AvZ installation path)"
+                }
+            }
+        },
+        "snippets": [{
+            "language": "cpp",
+            "path": "./snippets/snippets.json"
+        }]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

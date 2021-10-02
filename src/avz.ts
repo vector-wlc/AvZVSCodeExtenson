@@ -6,7 +6,9 @@
  */
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as http from "https"
+import { FileManager } from './file_manager';
+import * as template_strs from "./template_strs";
+
 
 export class Avz {
     private avzTerminal: vscode.Terminal | undefined;
@@ -15,6 +17,8 @@ export class Avz {
     private avzVersionTxtUrl: string;
     private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined;
     private runScriptCmd: string;
+    private fileManager: FileManager;
+    private avzDir: string;
 
     constructor() {
         this.avzTerminal = undefined;
@@ -23,33 +27,12 @@ export class Avz {
         this.avzVersionTxtUrl = this.giteeDepositoryUrl + this.avzVersionTxtName;
         this.workspaceRoot = vscode.workspace.workspaceFolders;
         this.runScriptCmd = "";
-        this.setRunScriptCmd();
-
+        this.fileManager = new FileManager;
+        this.avzDir = "";
     }
 
     private setRunScriptCmd() {
-        if (this.workspaceRoot) {
-            let workspaceRootPath = this.workspaceRoot[0].uri.fsPath;
-            // 设置环境变量
-            this.runScriptCmd = "set PATH=" + workspaceRootPath + "/MinGW/bin; %PATH% && ";
-
-            // 运行编译命令
-            this.runScriptCmd += workspaceRootPath + "/MinGW/bin/g++ ";
-            this.runScriptCmd += "__FILE_NAME__ ";
-            this.runScriptCmd += " -std=c++1z ";
-            this.runScriptCmd += "-I ";
-            this.runScriptCmd += workspaceRootPath + "/inc ";
-            this.runScriptCmd += "-l ";
-            this.runScriptCmd += "avz ";
-            this.runScriptCmd += "-L ";
-            this.runScriptCmd += workspaceRootPath + "/bin ";
-            this.runScriptCmd += "-shared ";
-            this.runScriptCmd += "-o ";
-            this.runScriptCmd += workspaceRootPath + "/bin/libavz.dll && ";
-
-            // 注入
-            this.runScriptCmd += workspaceRootPath + "/bin/injector.exe";
-        }
+        this.runScriptCmd = this.fileManager.strReplaceAll(template_strs.RUN_SCRIPT_CMD, "__AVZ_DIR__", this.avzDir);
     }
 
     private isCanRun(): boolean {
@@ -64,7 +47,57 @@ export class Avz {
         return true;
     }
 
-    private runAvzCmd(cmd: string) {
+    private createAvzFiles() {
+        let projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
+        let cCppJsonFile = this.fileManager.strReplaceAll(template_strs.C_CPP_JSON, "__AVZ_DIR__", this.avzDir);
+        this.fileManager.mkDir(projectDir + "/.vscode");
+        this.fileManager.mkDir(projectDir + "/bin");
+        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile);
+        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON);
+    }
+
+    public setAvzDir(avzDir: string = ""): void {
+        if (!this.isCanRun()) {
+            return;
+        }
+        if (avzDir === "") {
+            const result = vscode.workspace.getConfiguration().get('avzConfigure.avzDir');
+            if (result) {
+                avzDir = <string>result;
+            } else {
+                avzDir = this.workspaceRoot![0].uri.fsPath;
+            }
+        }
+
+        avzDir = this.fileManager.strReplaceAll(avzDir, "\\", "/");
+        let one_dirs = fs.readdirSync(avzDir);
+        for (let one_dir of one_dirs) {
+            if (one_dir.search("AsmVsZombies") !== -1) { // 找到 AsmVsZombies 文件夹
+                let two_dirs = fs.readdirSync(avzDir + "/" + one_dir);
+                for (let two_dir of two_dirs) {
+                    if (two_dir.search("MinGW") !== -1 || two_dir.search("inc") !== -1) { // 确定 AsmVsZombies 子目录
+                        this.avzDir = avzDir + "/" + one_dir;
+                        vscode.window.showInformationMessage("已找到 AvZ 安装目录 : " + this.avzDir);
+                        vscode.workspace.getConfiguration().update('avzConfigure.avzDir', this.avzDir, true);
+                        this.createAvzFiles();
+                        return;
+                    }
+                }
+            }
+
+            if (one_dir.search("MinGW") !== -1 || one_dir.search("inc") !== -1) { // 确定 AsmVsZombies 子目录
+                this.avzDir = avzDir;
+                vscode.window.showInformationMessage("已找到 AvZ 安装目录 : " + this.avzDir);
+                vscode.workspace.getConfiguration().update('avzConfigure.avzDir', this.avzDir, true);
+                this.createAvzFiles();
+                return;
+            }
+        }
+
+        vscode.window.showErrorMessage("未找到 AvZ 安装目录，请重新尝试运行命令： AvZ : Set AvZ Dir");
+    }
+
+    public runCmd(cmd: string) {
         if (this.avzTerminal === undefined) {
             this.avzTerminal = vscode.window.createTerminal("AvZ", "cmd");
         }
@@ -73,13 +106,21 @@ export class Avz {
     }
 
     public runScript() {
-        if (this.isCanRun()) {
-            this.setRunScriptCmd();
+        if (!this.isCanRun()) {
+            return;
         }
 
-        if (vscode.window.activeTextEditor) {
-            let fileName = vscode.window.activeTextEditor.document.fileName;
-            this.runAvzCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
+        if (this.avzDir === "") {
+            this.setAvzDir();
+
+        }
+
+        if (this.avzDir !== "") {
+            this.setRunScriptCmd();
+            if (vscode.window.activeTextEditor) {
+                let fileName = vscode.window.activeTextEditor.document.fileName;
+                this.runCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
+            }
         }
     }
 
@@ -87,44 +128,30 @@ export class Avz {
         this.avzTerminal = undefined;
     }
 
-    private downloadFile(url: string, dest: string, callback: Function): void {
-        const file = fs.createWriteStream(dest);
-        http.get(url, (res) => {
-            if (res.statusCode !== 200) {
-                vscode.window.showErrorMessage("下载文件 " + url + " 失败");
-                return;
-            }
-
-            file.on('finish', () => {
-                file.close();
-                callback();
-            }).on('error', (err) => {
-                fs.unlinkSync(dest);
-                vscode.window.showErrorMessage("下载文件 " + url + " 失败");
-            })
-            res.on('end', () => {
-            });
-            res.pipe(file);
-        });
-    }
-
     public getAvzVersionList(callback: Function): void {
         if (!this.isCanRun()) {
             return;
         }
-        let avzVersionTxtPath = this.workspaceRoot![0].uri.fsPath + "/" + this.avzVersionTxtName;
-        this.downloadFile(this.avzVersionTxtUrl, avzVersionTxtPath, () => {
-            const str = fs.readFileSync(avzVersionTxtPath, { encoding: 'utf8', flag: 'r' });
-            let avzVersionList = str.split("\n");
-            callback(avzVersionList);
-        })
+
+        if (this.avzDir === "") {
+            this.setAvzDir();
+        }
+
+        if (this.avzDir !== "") {
+            let avzVersionTxtPath = this.avzDir + "/" + this.avzVersionTxtName;
+            this.fileManager.downloadFile(this.avzVersionTxtUrl, avzVersionTxtPath, () => {
+                const str = fs.readFileSync(avzVersionTxtPath, { encoding: 'utf8', flag: 'r' });
+                let avzVersionList = str.split("\n");
+                callback(avzVersionList);
+            });
+        }
     }
 
     public setAvzVerison(avzVersion: string): void {
         let avzVersionUrl = this.giteeDepositoryUrl + avzVersion;
-        let avzFilePath = this.workspaceRoot![0].uri.fsPath + "/" + "avz.zip";
-        this.downloadFile(avzVersionUrl, avzFilePath, () => {
-            this.runAvzCmd("7z\\7z.exe x avz.zip -aoa");
+        let avzFilePath = this.avzDir + "/" + "avz.zip";
+        this.fileManager.downloadFile(avzVersionUrl, avzFilePath, () => {
+            this.runCmd(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
         });
     }
 }
