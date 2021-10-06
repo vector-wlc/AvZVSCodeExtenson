@@ -5,7 +5,7 @@
  * @Description:
  */
 
-export const RUN_SCRIPT_CMD = "set PATH= __AVZ_DIR__/MinGW/bin; %PATH% && \
+export const RUN_SCRIPT_CMD = "set PATH=__AVZ_DIR__/MinGW/bin; %PATH% && \
 __AVZ_DIR__/MinGW/bin/g++ \
 __FILE_NAME__ -std=c++1z -I __AVZ_DIR__/inc -l avz -L __AVZ_DIR__/bin -shared -o ./bin/libavz.dll && \
 __AVZ_DIR__/bin/injector.exe"
