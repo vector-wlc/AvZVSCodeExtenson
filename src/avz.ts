@@ -118,6 +118,7 @@ export class Avz {
         if (this.avzDir !== "") {
             this.setRunScriptCmd();
             if (vscode.window.activeTextEditor) {
+                vscode.window.activeTextEditor.document.save();
                 let fileName = vscode.window.activeTextEditor.document.fileName;
                 this.runCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
             }

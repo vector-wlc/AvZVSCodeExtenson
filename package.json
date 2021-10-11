@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.2.2",
+    "version": "0.2.4",
     "engines": {
         "vscode": "^1.27.0"
     },

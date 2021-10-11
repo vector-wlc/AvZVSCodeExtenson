@@ -25,4 +25,5 @@ export const C_CPP_JSON = "{\n\
 export const SETTINGS_JSON = "{\n\
     \"editor.formatOnSave\": true,\n\
     \"C_Cpp.clang_format_fallbackStyle\": \"{ BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true}\",\n\
+    \"C_Cpp.errorSquiggles\": \"Disabled\"\n\
 }"
