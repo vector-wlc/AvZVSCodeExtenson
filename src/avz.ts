@@ -8,6 +8,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { FileManager } from './file_manager';
 import * as template_strs from "./template_strs";
+import { execSync } from 'child_process';
+import internal = require('stream');
 
 
 export class Avz {
@@ -19,6 +21,9 @@ export class Avz {
     private runScriptCmd: string;
     private fileManager: FileManager;
     private avzDir: string;
+    private pvzProcessPid: string;
+    private pvzExePath: string;
+    private pvzExeName: string;
 
     constructor() {
         this.avzTerminal = undefined;
@@ -29,6 +34,9 @@ export class Avz {
         this.runScriptCmd = "";
         this.fileManager = new FileManager;
         this.avzDir = "";
+        this.pvzProcessPid = "";
+        this.pvzExePath = "";
+        this.pvzExeName = "PlantsVsZombies.exe";
     }
 
     private setRunScriptCmd() {
@@ -50,10 +58,13 @@ export class Avz {
     private createAvzFiles() {
         let projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
         let cCppJsonFile = this.fileManager.strReplaceAll(template_strs.C_CPP_JSON, "__AVZ_DIR__", this.avzDir);
+        let launchJsonFile = this.fileManager.strReplaceAll(template_strs.LAUNCH_JSON, "__AVZ_DIR__", this.avzDir);
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
         this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile);
         this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON);
+        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON);
+        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile);
     }
 
     public setAvzDir(avzDir: string = ""): void {
@@ -105,6 +116,20 @@ export class Avz {
         this.avzTerminal.show();
     }
 
+    private killGdb32() {
+        let output = execSync("wmic process where name=\"gdb32.exe\" get processid,executablepath").toString();
+        output = this.fileManager.strReplaceAll(output, "\\", "/");
+        let gdbProcessList = output.split("\n");
+        for (let index = 0; index < gdbProcessList.length; ++index) {
+            if (gdbProcessList[index].indexOf(this.avzDir) >= 0 && //
+                gdbProcessList[index].indexOf("MinGW") >= 0) {
+                let gdbPid = gdbProcessList[index].trim().split(/\s+/)[1];
+                this.runCmd("taskkill /f /pid " + gdbPid);
+                return;
+            }
+        }
+    }
+
     public runScript() {
         if (!this.isCanRun()) {
             return;
@@ -112,7 +137,6 @@ export class Avz {
 
         if (this.avzDir === "") {
             this.setAvzDir();
-
         }
 
         if (this.avzDir !== "") {
@@ -120,6 +144,8 @@ export class Avz {
             if (vscode.window.activeTextEditor) {
                 vscode.window.activeTextEditor.document.save();
                 let fileName = vscode.window.activeTextEditor.document.fileName;
+                // 把调试进程强制杀掉
+                this.killGdb32();
                 this.runCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
             }
         }
@@ -154,5 +180,47 @@ export class Avz {
         this.fileManager.downloadFile(avzVersionUrl, avzFilePath, () => {
             this.runCmd(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
         });
+    }
+
+    public getPvzExePath(): string {
+        // 得到 pvzExeName
+        const result = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName');
+        if (result) {
+            this.pvzExeName = <string>result;
+        } else {
+            vscode.workspace.getConfiguration().update('avzConfigure.pvzExeName', this.pvzExeName, true);
+        }
+
+        // 寻找 Path
+        let output = execSync("wmic process where name=\"" + this.pvzExeName + "\" get ExecutablePath").toString();
+        let pvzExePathList = output.split("\n");
+        if (pvzExePathList[1].indexOf('PlantsVsZombies.exe') >= 0) {
+            let pvzExePath = pvzExePathList[1].trim();
+            return pvzExePath;
+        }
+
+        return "PvZ is not activated!";
+    }
+
+    public getPvzProcessId(): string {
+
+        // 得到 pvzExeName
+        const result = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName');
+        if (result) {
+            this.pvzExeName = <string>result;
+        } else {
+            vscode.workspace.getConfiguration().update('avzConfigure.pvzExeName', this.pvzExeName, true);
+        }
+
+        // 寻找 PID
+        let output = execSync("tasklist |find /i \"" + this.pvzExeName + "\"").toString();
+        let p = output.trim().split(/\s+/);
+        let pname = p[0];
+        let pid = p[1];
+        if (pname.indexOf('PlantsVsZombies.exe') >= 0 && parseInt(pid)) {
+            return pid;
+        }
+
+        return "PvZ is not activated!";
     }
 }

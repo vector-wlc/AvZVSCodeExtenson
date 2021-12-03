@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.2.4",
+    "version": "0.3.0",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -18,7 +18,9 @@
         "onCommand:AsmVsZombies.runScript",
         "onCommand:AsmVsZombies.updateAvz",
         "onCommand:AsmVsZombies.openAvzTutorial",
-        "onCommand:AsmVsZombies.setAvzDir"
+        "onCommand:AsmVsZombies.setAvzDir",
+        "onCommand:AsmVsZombies.getPvzExePath",
+        "onCommand:AsmVsZombies.getPvzProcessId"
     ],
     "keywords": ["avz", "pvz"],
     "icon": "image/avz.ico",
@@ -36,6 +38,12 @@
         }, {
             "command": "AsmVsZombies.setAvzDir",
             "title": "AvZ : Set AvZ Dir"
+        }, {
+            "command": "AsmVsZombies.getPvzExePath",
+            "title": "AvZ : Get PvZ Exe Name"
+        }, {
+            "command": "AsmVsZombies.getPvzProcessId",
+            "title": "AvZ : Get PvZ Process Id"
         }],
         "menus": {
             "editor/context": [{
@@ -52,6 +60,11 @@
                     "type": "string",
                     "default": "",
                     "description": "AvZ 安装路径 (AvZ installation path)"
+                },
+                "avzConfigure.pvzExeName": {
+                    "type": "string",
+                    "default": "PlantsVsZombies.exe",
+                    "description": "PvZ 可执行文件名称"
                 }
             }
         },

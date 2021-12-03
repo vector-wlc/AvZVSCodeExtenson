@@ -45,7 +45,15 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
-		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies")
+		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies");
+	});
+
+	let getPvzExePath = vscode.commands.registerCommand('AsmVsZombies.getPvzExePath', () => {
+		return avz.getPvzExePath();
+	});
+
+	let getPvzProcessId = vscode.commands.registerCommand('AsmVsZombies.getPvzProcessId', () => {
+		return avz.getPvzProcessId();
 	});
 
 	let setAvzDir = vscode.commands.registerCommand('AsmVsZombies.setAvzDir', () => {
@@ -69,6 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(closeTerminal);
 	context.subscriptions.push(openAvzTutorial);
 	context.subscriptions.push(setAvzDir);
+	context.subscriptions.push(getPvzExePath);
+	context.subscriptions.push(getPvzProcessId);
 }
 
 // this method is called when your extension is deactivated
