@@ -37,6 +37,14 @@ export class Avz {
         this.pvzProcessPid = "";
         this.pvzExePath = "";
         this.pvzExeName = "PlantsVsZombies.exe";
+
+        vscode.window.terminals.forEach(terminal => {
+            if (terminal.name === "AvZ") {
+                this.avzTerminal = terminal;
+                return;
+            }
+        });
+
     }
 
     private setRunScriptCmd() {
@@ -61,10 +69,10 @@ export class Avz {
         let launchJsonFile = this.fileManager.strReplaceAll(template_strs.LAUNCH_JSON, "__AVZ_DIR__", this.avzDir);
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
-        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile);
-        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON);
-        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON);
-        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile);
+        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile, false);
+        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON, false);
+        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON, false);
+        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile, false);
     }
 
     public setAvzDir(avzDir: string = ""): void {
@@ -105,7 +113,7 @@ export class Avz {
             }
         }
 
-        vscode.window.showErrorMessage("未找到 AvZ 安装目录，请重新尝试运行命令： AvZ : Set AvZ Dir");
+        vscode.window.showErrorMessage("未找到 AvZ 安装目录，请重新尝试运行命令: AvZ : Set AvZ Dir");
     }
 
     public runCmd(cmd: string) {
@@ -117,16 +125,26 @@ export class Avz {
     }
 
     private killGdb32() {
-        let output = execSync("wmic process where name=\"gdb32.exe\" get processid,executablepath").toString();
-        output = this.fileManager.strReplaceAll(output, "\\", "/");
-        let gdbProcessList = output.split("\n");
-        for (let index = 0; index < gdbProcessList.length; ++index) {
-            if (gdbProcessList[index].indexOf(this.avzDir) >= 0 && //
-                gdbProcessList[index].indexOf("MinGW") >= 0) {
-                let gdbPid = gdbProcessList[index].trim().split(/\s+/)[1];
-                this.runCmd("taskkill /f /pid " + gdbPid);
-                return;
+
+        let cmdStr = "wmic process where name=\"gdb32.exe\" get processid,executablepath";
+        try {
+            let output = execSync(cmdStr).toString();
+            output = this.fileManager.strReplaceAll(output, "\\", "/");
+            let gdbProcessList = output.split("\n");
+            for (let index = 0; index < gdbProcessList.length; ++index) {
+                if (gdbProcessList[index].indexOf(this.avzDir) >= 0 && //
+                    gdbProcessList[index].indexOf("MinGW") >= 0) {
+                    let gdbPid = gdbProcessList[index].trim().split(/\s+/)[1];
+                    try {
+                        execSync("taskkill /f /pid " + gdbPid);
+                    } catch (e) {
+                        vscode.window.showErrorMessage("终止进程 gdb 失败");
+                    }
+                    return;
+                }
             }
+        } catch (e) {
+            vscode.window.showErrorMessage("执行命令 : " + cmdStr + "失败");
         }
     }
 

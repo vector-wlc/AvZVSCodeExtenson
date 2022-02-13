@@ -18,9 +18,13 @@ export class FileManager {
         return fs.existsSync(dirName);
     }
 
-    public writeFile(fileName: string, content: string): void {
+    public writeFile(fileName: string, content: string, isUnlink: boolean = true): void {
         if (fs.existsSync(fileName)) {
-            fs.unlinkSync(fileName);
+            if (isUnlink) {
+                fs.unlinkSync(fileName);
+            } else {
+                return;
+            }
         }
         fs.writeFile(fileName, content, "utf-8", (err) => {
             if (err) {
