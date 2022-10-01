@@ -48,7 +48,23 @@ export class Avz {
     }
 
     private setRunScriptCmd() {
-        this.runScriptCmd = this.fileManager.strReplaceAll(template_strs.RUN_SCRIPT_CMD, "__AVZ_DIR__", this.avzDir);
+        const str = vscode.workspace.getConfiguration().get('avzConfigure.avzCompilerCmd');
+        let avzCompilerCmd: string;
+        if (str) {
+            avzCompilerCmd = <string>str;
+        } else {
+            avzCompilerCmd = template_strs.COMPILER_CMD;
+            vscode.workspace.getConfiguration().update('avzConfigure.avzRunScriptCmd', this.runScriptCmd, true);
+        }
+        const result = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd');
+        if (result) {
+            this.runScriptCmd = <string>result;
+        } else {
+            this.runScriptCmd = template_strs.RUN_SCRIPT_CMD;
+            vscode.workspace.getConfiguration().update('avzConfigure.avzRunScriptCmd', this.runScriptCmd, true);
+        }
+        this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__COMPILER_CMD__", avzCompilerCmd);
+        this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__AVZ_DIR__", this.avzDir);
     }
 
     private isCanRun(): boolean {
@@ -126,25 +142,10 @@ export class Avz {
 
     private killGdb32() {
 
-        let cmdStr = "wmic process where name=\"gdb32.exe\" get processid,executablepath";
         try {
-            let output = execSync(cmdStr).toString();
-            output = this.fileManager.strReplaceAll(output, "\\", "/");
-            let gdbProcessList = output.split("\n");
-            for (let index = 0; index < gdbProcessList.length; ++index) {
-                if (gdbProcessList[index].indexOf(this.avzDir) >= 0 && //
-                    gdbProcessList[index].indexOf("MinGW") >= 0) {
-                    let gdbPid = gdbProcessList[index].trim().split(/\s+/)[1];
-                    try {
-                        execSync("taskkill /f /pid " + gdbPid);
-                    } catch (e) {
-                        vscode.window.showErrorMessage("终止进程 gdb 失败");
-                    }
-                    return;
-                }
-            }
+            execSync("taskkill /F /IM gdb32.exe");
         } catch (e) {
-            vscode.window.showErrorMessage("执行命令 : " + cmdStr + "失败");
+
         }
     }
 

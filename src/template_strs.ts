@@ -5,10 +5,9 @@
  * @Description:
  */
 
-export const RUN_SCRIPT_CMD = "set PATH=\"__AVZ_DIR__/MinGW/bin\"; \"%PATH%\" && \
-\"__AVZ_DIR__/MinGW/bin/g++\" \
--g \"__FILE_NAME__\" -std=c++1z -I \"__AVZ_DIR__/inc\" -l avz -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\" && \
-\"__AVZ_DIR__/bin/injector.exe\""
+export const RUN_SCRIPT_CMD = "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__  &&  \"__AVZ_DIR__/bin/injector.exe\""
+
+export const COMPILER_CMD = "-g \"__FILE_NAME__\" -std=c++1z -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\"";
 
 export const C_CPP_JSON = "{\n\
     \"configurations\": [{\n\
@@ -20,13 +19,13 @@ export const C_CPP_JSON = "{\n\
         \"cppStandard\": \"c++17\"\n\
     }],\n\
     \"version\": 4\n\
-}"
+}";
 
 export const SETTINGS_JSON = "{\n\
     \"editor.formatOnSave\": true,\n\
     \"C_Cpp.clang_format_fallbackStyle\": \"{ BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true}\",\n\
     \"C_Cpp.errorSquiggles\": \"Disabled\"\n\
-}"
+}";
 
 export const LAUNCH_JSON = "{\n\
     \"configurations\": [\n\
@@ -53,7 +52,7 @@ export const LAUNCH_JSON = "{\n\
             \"preLaunchTask\": \"avz\"\n\
         }\n\
     ]\n\
-}"
+}";
 
 export const TASKS_JSON = "{\n\
     \"tasks\": [\n\
@@ -64,4 +63,4 @@ export const TASKS_JSON = "{\n\
         }\n\
     ],\n\
     \"version\": \"2.0.0\"\n\
-}"
+}";
