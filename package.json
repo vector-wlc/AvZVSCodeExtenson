@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.3.4",
+    "version": "0.4.0",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -20,7 +20,8 @@
         "onCommand:AsmVsZombies.openAvzTutorial",
         "onCommand:AsmVsZombies.setAvzDir",
         "onCommand:AsmVsZombies.getPvzExePath",
-        "onCommand:AsmVsZombies.getPvzProcessId"
+        "onCommand:AsmVsZombies.getPvzProcessId",
+        "onCommand:AsmVsZombies.getAvZExtension"
     ],
     "keywords": ["avz", "pvz"],
     "icon": "image/avz.ico",
@@ -44,6 +45,9 @@
         }, {
             "command": "AsmVsZombies.getPvzProcessId",
             "title": "AvZ : Get PvZ Process Id"
+        }, {
+            "command": "AsmVsZombies.getAvZExtension",
+            "title": "AvZ : Get AvZ Extension"
         }],
         "menus": {
             "editor/context": [{

@@ -28,20 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
-		avz.getAvzVersionList((avzVersionList: string[]) => {
-			if (avzVersionList.length === 0) {
-				return;
-			}
-
-			const options: vscode.QuickPickOptions = {
-				title: "请选择 AvZ 版本"
-			};
-			vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => {
-				if (avzVersion && avzVersion.length !== 0) {
-					avz.setAvzVerison(avzVersion);
-				}
-			});
-		});
+		avz.getAvzVersionList();
 	});
 
 	let openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
@@ -71,6 +58,9 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
+	let getAvZExtension = vscode.commands.registerCommand('AsmVsZombies.getAvZExtension', () => {
+		return avz.getExtensionList();
+	});
 
 	context.subscriptions.push(runScript);
 	context.subscriptions.push(updateAvz);
@@ -79,6 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(setAvzDir);
 	context.subscriptions.push(getPvzExePath);
 	context.subscriptions.push(getPvzProcessId);
+	context.subscriptions.push(getAvZExtension);
 }
 
 // this method is called when your extension is deactivated

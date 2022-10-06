@@ -38,25 +38,56 @@ export class FileManager {
     }
 
 
-    public downloadFile(url: string, dest: string, callback: Function): void {
-        const file = fs.createWriteStream(dest);
-        http.get(url, (res) => {
-            if (res.statusCode !== 200) {
-                vscode.window.showErrorMessage("下载文件 " + url + " 失败");
-                return;
-            }
+    public downloadFile(url: string, dest: string): Promise<string> {
+        let promise = new Promise<string>(function (callback, reject) {
+            const file = fs.createWriteStream(dest);
+            http.get(url, (res) => {
+                if (res.statusCode !== 200) {
+                    vscode.window.showErrorMessage("下载文件 " + url + " 失败");
+                    return;
+                }
 
-            file.on('finish', () => {
-                file.close();
-                callback();
-            }).on('error', (err) => {
-                fs.unlinkSync(dest);
-                vscode.window.showErrorMessage("下载文件 " + url + " 失败");
-            })
-            res.on('end', () => {
+                file.on('finish', () => {
+                    file.close();
+                    callback(dest);
+                }).on('error', (err) => {
+                    fs.unlinkSync(dest);
+                    vscode.window.showErrorMessage("下载文件 " + url + " 失败");
+                })
+                res.on('end', () => {
+                });
+                res.pipe(file);
             });
-            res.pipe(file);
         });
+
+        return promise;
     }
 
+
+    public downloadToPick(remote: string, local: string, title: string): Promise<string> {
+        let __this = this;
+        let promise = new Promise<string>(function (callback, reject) {
+            __this.downloadFile(remote, local).then(localFile => {
+                const str = fs.readFileSync(localFile, { encoding: 'utf8', flag: 'r' });
+                let list = str.split("\n");
+                if (list.length === 0) {
+                    return;
+                }
+                const options: vscode.QuickPickOptions = {
+                    title: title
+                };
+                vscode.window.showQuickPick(list, options).then(str => {
+                    if (str && str.length !== 0) {
+                        callback(str);
+                    }
+                });
+            });
+        });
+        return promise;
+    }
+
+    public readFile(fileName: string): string[] {
+        const str = fs.readFileSync(fileName, { encoding: 'utf8', flag: 'r' });
+        return str.split("\n");
+    }
 }

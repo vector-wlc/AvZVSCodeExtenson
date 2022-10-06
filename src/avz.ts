@@ -9,42 +9,29 @@ import * as fs from 'fs';
 import { FileManager } from './file_manager';
 import * as template_strs from "./template_strs";
 import { execSync } from 'child_process';
-import internal = require('stream');
-
 
 export class Avz {
-    private avzTerminal: vscode.Terminal | undefined;
-    private giteeDepositoryUrl: string;
-    private avzVersionTxtName: string;
-    private avzVersionTxtUrl: string;
-    private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined;
-    private runScriptCmd: string;
-    private fileManager: FileManager;
-    private avzDir: string;
-    private pvzProcessPid: string;
-    private pvzExePath: string;
-    private pvzExeName: string;
-
+    private avzTerminal: vscode.Terminal | undefined = undefined;
+    private giteeDepositoryUrl: string = "https://gitee.com/vector-wlc/AsmVsZombies/raw/master/release/";
+    private avzVersionTxtName: string = "version.txt";
+    private avzVersionTxtUrl: string = this.giteeDepositoryUrl + this.avzVersionTxtName;
+    private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+    private runScriptCmd: string = "";
+    private fileManager: FileManager = new FileManager;;
+    private avzDir: string = "";
+    private pvzExeName: string = "PlantsVsZombies.exe";
+    private extensionGiteeDepositoryUrl: string = "https://gitee.com/qrmd/AvZLib/raw/main";
+    private extensionName: string = "";
+    private extensionVerisonName: string = "";
+    private avzVerison: string = "";
+    private extensionDownloadList: string[] = [];
     constructor() {
-        this.avzTerminal = undefined;
-        this.giteeDepositoryUrl = "https://gitee.com/vector-wlc/AsmVsZombies/raw/master/release/";
-        this.avzVersionTxtName = "version.txt";
-        this.avzVersionTxtUrl = this.giteeDepositoryUrl + this.avzVersionTxtName;
-        this.workspaceRoot = vscode.workspace.workspaceFolders;
-        this.runScriptCmd = "";
-        this.fileManager = new FileManager;
-        this.avzDir = "";
-        this.pvzProcessPid = "";
-        this.pvzExePath = "";
-        this.pvzExeName = "PlantsVsZombies.exe";
-
         vscode.window.terminals.forEach(terminal => {
             if (terminal.name === "AvZ") {
                 this.avzTerminal = terminal;
                 return;
             }
         });
-
     }
 
     private setRunScriptCmd() {
@@ -174,7 +161,7 @@ export class Avz {
         this.avzTerminal = undefined;
     }
 
-    public getAvzVersionList(callback: Function): void {
+    public getAvzVersionList(): void {
         if (!this.isCanRun()) {
             return;
         }
@@ -185,20 +172,27 @@ export class Avz {
 
         if (this.avzDir !== "") {
             let avzVersionTxtPath = this.avzDir + "/" + this.avzVersionTxtName;
-            this.fileManager.downloadFile(this.avzVersionTxtUrl, avzVersionTxtPath, () => {
-                const str = fs.readFileSync(avzVersionTxtPath, { encoding: 'utf8', flag: 'r' });
-                let avzVersionList = str.split("\n");
-                callback(avzVersionList);
+            this.fileManager.downloadFile(this.avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
+                let avzVersionList = this.fileManager.readFile(avzVersionTxtPath);
+                if (avzVersionList.length === 0) {
+                    return;
+                }
+
+                const options: vscode.QuickPickOptions = {
+                    title: "请选择 AvZ 版本"
+                };
+                vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => { // 得到版本文件
+                    if (avzVersion && avzVersion.length !== 0) {
+                        let avzVersionUrl = this.giteeDepositoryUrl + avzVersion;
+                        let avzFilePath = this.avzDir + "/" + "avz.zip";
+                        this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(avzVersionTxtPath => {
+                            execSync(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
+                            vscode.window.showInformationMessage("AvZ 更新成功");
+                        });
+                    }
+                });
             });
         }
-    }
-
-    public setAvzVerison(avzVersion: string): void {
-        let avzVersionUrl = this.giteeDepositoryUrl + avzVersion;
-        let avzFilePath = this.avzDir + "/" + "avz.zip";
-        this.fileManager.downloadFile(avzVersionUrl, avzFilePath, () => {
-            this.runCmd(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
-        });
     }
 
     public getPvzExePath(): string {
@@ -241,5 +235,100 @@ export class Avz {
         }
 
         return "PvZ is not activated!";
+    }
+
+    private getAvzVerison(__this: Avz): void {
+        if (this.avzVerison !== "") {
+            return;
+        }
+        const strList = __this.fileManager.readFile(__this.avzDir + "/inc/libavz.h");
+        for (let index = 0; index < strList.length; index++) {
+            const element = strList[index];
+            if (element.indexOf("__AVZ_VERSION__") !== -1) {
+                __this.avzVerison = element.split(" ")[2];
+                __this.avzVerison = "20" + __this.avzVerison.substring(0, 2) + "_" + __this.avzVerison.substring(2, 4) + "_" + __this.avzVerison.substring(4, 6);
+                break;
+            }
+        }
+    }
+
+    public getExtensionList(): void {
+        if (!this.isCanRun()) {
+            return;
+        }
+
+        if (this.avzDir === "") {
+            this.setAvzDir();
+        }
+
+        let extensionListTxtName = "extension_list.txt";
+        this.extensionDownloadList = [];
+
+        let incDir = fs.readdirSync(this.avzDir + "/inc")
+        for (let idx = 0; idx < incDir.length; ++idx) { // 读取已经安装的插件列表
+            if (incDir[idx].indexOf(".h") === -1) {
+                this.extensionDownloadList.push(incDir[idx]);
+            }
+        }
+
+        if (this.avzDir !== "") {
+            let extensionListRemotePath = this.extensionGiteeDepositoryUrl + "/" + extensionListTxtName;
+            let extensionListLocalPath = this.avzDir + "/" + extensionListTxtName;
+            this.fileManager.downloadToPick(extensionListRemotePath, extensionListLocalPath, "请选择插件").then(extensionName => {
+                this.extensionName = extensionName;
+                let versionTxtRemotePath = this.extensionGiteeDepositoryUrl + "/" + extensionName + "/version.txt";
+                let versionTxtLocalPath = this.avzDir + "/version.txt";
+                return this.fileManager.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, "请选择版本");
+            }).then(versionName => {
+                this.extensionVerisonName = versionName;
+                this.installExtension(this, true);
+            })
+        }
+    }
+
+    private installExtension(__this: Avz, isForceInstall: boolean = false): void {
+        let isPush = true;
+        // 已经下载过的插件不再进行下载
+        for (let idx = 0; idx < __this.extensionDownloadList.length; ++idx) {
+            if (__this.extensionName.indexOf(__this.extensionDownloadList[idx]) !== -1) {
+                if (!isForceInstall) {
+                    vscode.window.showWarningMessage("您已安装过插件: " + __this.extensionDownloadList[idx] +
+                        ", 因此不再进行重复安装, 如果遇到版本兼容性问题, 请手动安装该插件的其他版本, 如果实在解决不了问题, 请联系插件作者.");
+                    return;
+                } else {
+                    isPush = false;
+                    break;
+                }
+            }
+        }
+
+        if (isPush) {
+            __this.extensionDownloadList.push(__this.extensionName);
+        }
+
+        let extensionRemoteFile = __this.extensionGiteeDepositoryUrl + "/" + __this.extensionName + "/release/" + __this.extensionVerisonName + ".zip";
+        let extensionLocalFile = __this.avzDir + "/inc/extension.zip";
+        __this.fileManager.downloadFile(extensionRemoteFile, extensionLocalFile).then(file => {
+            execSync(__this.avzDir + "/7z/7z.exe x " + __this.avzDir + "/inc/extension.zip -aoa -o" + __this.avzDir + "/inc");
+            // 读取插件的依赖列表
+            let extensionName = __this.extensionName.split("/")[1];
+            const strList = __this.fileManager.readFile(__this.avzDir + "/inc/" + extensionName + "/information.txt");
+            for (let idx = 0; idx < strList.length; ++idx) {
+                if (idx == 1) { // AvZ Version
+                    __this.getAvzVerison(__this);
+                    let needAvzVerison = strList[idx].split(" ")[1];
+                    if (needAvzVerison !== __this.avzVerison) {
+                        vscode.window.showWarningMessage("您下载的插件 " + extensionName + " 依赖的 AvZ 版本为 " + needAvzVerison +
+                            ", 但是现在的 AvZ 版本为 " + __this.avzVerison + ", 这可能带来不兼容问题!");
+                    }
+                } else if (idx > 1) {
+                    let tempList = strList[idx].split(" ");
+                    __this.extensionName = tempList[0];
+                    __this.extensionVerisonName = tempList[1];
+                    __this.installExtension(__this);
+                }
+            }
+            vscode.window.showInformationMessage("插件: " + __this.extensionName + " 安装结束");
+        });
     }
 }
