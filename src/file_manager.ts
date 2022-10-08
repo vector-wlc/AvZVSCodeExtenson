@@ -68,8 +68,7 @@ export class FileManager {
         let __this = this;
         let promise = new Promise<string>(function (callback, reject) {
             __this.downloadFile(remote, local).then(localFile => {
-                const str = fs.readFileSync(localFile, { encoding: 'utf8', flag: 'r' });
-                let list = str.split("\n");
+                let list = __this.readFile(localFile);
                 if (list.length === 0) {
                     return;
                 }
@@ -88,6 +87,7 @@ export class FileManager {
 
     public readFile(fileName: string): string[] {
         const str = fs.readFileSync(fileName, { encoding: 'utf8', flag: 'r' });
-        return str.split("\n");
+        let ret = this.strReplaceAll(str, "\r", "");
+        return ret.split("\n");
     }
 }

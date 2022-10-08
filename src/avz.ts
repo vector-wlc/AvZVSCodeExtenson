@@ -314,6 +314,9 @@ export class Avz {
             let extensionName = __this.extensionName.split("/")[1];
             const strList = __this.fileManager.readFile(__this.avzDir + "/inc/" + extensionName + "/information.txt");
             for (let idx = 0; idx < strList.length; ++idx) {
+                if (strList[idx] === "") {
+                    continue;
+                }
                 if (idx == 1) { // AvZ Version
                     __this.getAvzVerison(__this);
                     let needAvzVerison = strList[idx].split(" ")[1];
