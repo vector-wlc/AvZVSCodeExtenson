@@ -127,7 +127,7 @@ export class Avz {
         this.avzTerminal.show();
     }
 
-    private killGdb32() {
+    private killGdb() {
 
         try {
             execSync("taskkill /F /IM gdb32.exe");
@@ -151,7 +151,7 @@ export class Avz {
                 vscode.window.activeTextEditor.document.save();
                 let fileName = vscode.window.activeTextEditor.document.fileName;
                 // 把调试进程强制杀掉
-                this.killGdb32();
+                this.killGdb();
                 this.runCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
             }
         }
