@@ -2,11 +2,9 @@
     "ast": {
         "prefix": "AvZ Script Template",
         "body": [
-            "#include \"avz.h\"",
+            "#include <avz.h>",
             "",
-            "using namespace AvZ;",
-            "",
-            "void Script() {",
+            "void AScript() {",
             "    $0",
             "}"
         ],
