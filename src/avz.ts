@@ -320,7 +320,7 @@ export class Avz {
                 if (idx == 1) { // AvZ Version
                     __this.getAvzVerison(__this);
                     let needAvzVerison = strList[idx].split(" ")[1];
-                    if (needAvzVerison !== __this.avzVerison) {
+                    if (needAvzVerison.indexOf(__this.avzVerison) === -1) {
                         vscode.window.showWarningMessage("您下载的插件 " + extensionName + " 依赖的 AvZ 版本为 " + needAvzVerison +
                             ", 但是现在的 AvZ 版本为 " + __this.avzVerison + ", 这可能带来不兼容问题!");
                     }

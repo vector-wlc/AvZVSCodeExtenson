@@ -88,6 +88,10 @@ export class FileManager {
     public readFile(fileName: string): string[] {
         const str = fs.readFileSync(fileName, { encoding: 'utf8', flag: 'r' });
         let ret = this.strReplaceAll(str, "\r", "");
-        return ret.split("\n");
+        let strList = ret.split("\n");
+        while (strList[strList.length - 1] === "") {
+            strList.pop();
+        }
+        return strList;
     }
 }
