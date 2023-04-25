@@ -7,7 +7,7 @@
 
 export const RUN_SCRIPT_CMD = "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__  &&  \"__AVZ_DIR__/bin/injector.exe\""
 
-export const COMPILER_CMD = "-m32 -static -std=c++20 -g -Wall \"__FILE_NAME__\" -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -ldbghelp -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\"";
+export const COMPILER_CMD = "-m32 -static -std=c++20 -g -Wall -Werror=return-type \"__FILE_NAME__\" -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -ldbghelp -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\"";
 
 export const C_CPP_JSON = "{\n\
     \"configurations\": [{\n\

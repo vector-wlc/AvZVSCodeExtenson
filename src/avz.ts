@@ -17,7 +17,7 @@ export class Avz {
     private avzVersionTxtUrl: string = this.giteeDepositoryUrl + this.avzVersionTxtName;
     private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     private runScriptCmd: string = "";
-    private fileManager: FileManager = new FileManager;;
+    private fileManager: FileManager = new FileManager;
     private avzDir: string = "";
     private pvzExeName: string = "PlantsVsZombies.exe";
     private extensionGiteeDepositoryUrl: string = "https://gitee.com/qrmd/AvZLib/raw/main";
@@ -161,6 +161,22 @@ export class Avz {
         this.avzTerminal = undefined;
     }
 
+    private getAvzEnvVersion(): string {
+        let clangPath = this.avzDir + "/MinGW/bin/clang++.exe";
+        return fs.existsSync(clangPath) ? "env2" : "env1"
+    }
+
+    private getAvzListWithEnv(vList: string[]): string[] {
+        let envVersion = this.getAvzEnvVersion();
+        let ret: string[] = [];
+        for (let index = 0; index < vList.length; index++) {
+            if (vList[index].indexOf(envVersion) >= 0) {
+                ret.push(vList[index]);
+            }
+        }
+        return ret;
+    }
+
     public getAvzVersionList(): void {
         if (!this.isCanRun()) {
             return;
@@ -177,7 +193,7 @@ export class Avz {
                 if (avzVersionList.length === 0) {
                     return;
                 }
-
+                avzVersionList = this.getAvzListWithEnv(avzVersionList);
                 const options: vscode.QuickPickOptions = {
                     title: "请选择 AvZ 版本"
                 };

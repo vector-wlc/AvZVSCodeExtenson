@@ -1,11 +1,23 @@
 {
     "ast": {
-        "prefix": "AvZ Script Template",
+        "prefix": "ast",
         "body": [
             "#include <avz.h>",
             "",
             "void AScript() {",
             "    $0",
+            "}"
+        ],
+        "description": "AvZ Script 固定模板"
+    },
+    "acost": {
+        "prefix": "acost",
+        "body": [
+            "#include <avz.h>",
+            "",
+            "ACoroutine ACoScript() {",
+            "    $0",
+            "    co_return;",
             "}"
         ],
         "description": "AvZ Script 固定模板"
