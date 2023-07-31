@@ -12,15 +12,21 @@ import { execSync } from 'child_process';
 
 export class Avz {
     private avzTerminal: vscode.Terminal | undefined = undefined;
-    private giteeDepositoryUrl: string = "https://gitee.com/vector-wlc/AsmVsZombies/raw/master/release/";
-    private avzVersionTxtName: string = "version.txt";
-    private avzVersionTxtUrl: string = this.giteeDepositoryUrl + this.avzVersionTxtName;
+    private avzRepositoryUrl: Map<string, string> = new Map([
+        ["GitHub", "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
+        ["GitLab", "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
+        ["Gitee", "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
+    ]);
+    private extensionRepositoryUrl: Map<string, string> = new Map([
+        ["GitHub", "https://github.com/qrmd0/AvZLib/raw/main"],
+        ["GitLab", "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
+        ["Gitee", "https://gitee.com/qrmd/AvZLib/raw/main"],
+    ]);
     private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     private runScriptCmd: string = "";
     private fileManager: FileManager = new FileManager;
     private avzDir: string = "";
     private pvzExeName: string = "PlantsVsZombies.exe";
-    private extensionGiteeDepositoryUrl: string = "https://gitee.com/qrmd/AvZLib/raw/main";
     private extensionName: string = "";
     private extensionVerisonName: string = "";
     private avzVerison: string = "";
@@ -187,8 +193,10 @@ export class Avz {
         }
 
         if (this.avzDir !== "") {
-            let avzVersionTxtPath = this.avzDir + "/" + this.avzVersionTxtName;
-            this.fileManager.downloadFile(this.avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
+            const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
+            let avzVersionTxtUrl = `${this.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
+            let avzVersionTxtPath = this.avzDir + "/version.txt";
+            this.fileManager.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
                 let avzVersionList = this.fileManager.readFile(avzVersionTxtPath);
                 if (avzVersionList.length === 0) {
                     return;
@@ -199,7 +207,7 @@ export class Avz {
                 };
                 vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => { // 得到版本文件
                     if (avzVersion && avzVersion.length !== 0) {
-                        let avzVersionUrl = this.giteeDepositoryUrl + avzVersion;
+                        let avzVersionUrl = `${this.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
                         let avzFilePath = this.avzDir + "/" + "avz.zip";
                         this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(avzVersionTxtPath => {
                             execSync(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
@@ -288,11 +296,12 @@ export class Avz {
         }
 
         if (this.avzDir !== "") {
-            let extensionListRemotePath = this.extensionGiteeDepositoryUrl + "/" + extensionListTxtName;
+            const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
+            let extensionListRemotePath = `${this.extensionRepositoryUrl.get(downloadSource)}/extension_list.txt`;
             let extensionListLocalPath = this.avzDir + "/" + extensionListTxtName;
             this.fileManager.downloadToPick(extensionListRemotePath, extensionListLocalPath, "请选择插件").then(extensionName => {
                 this.extensionName = extensionName;
-                let versionTxtRemotePath = this.extensionGiteeDepositoryUrl + "/" + extensionName + "/version.txt";
+                let versionTxtRemotePath = `${this.extensionRepositoryUrl.get(downloadSource)}/${extensionName}/version.txt`;
                 let versionTxtLocalPath = this.avzDir + "/version.txt";
                 return this.fileManager.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, "请选择版本");
             }).then(versionName => {
@@ -322,7 +331,8 @@ export class Avz {
             __this.extensionDownloadList.push(__this.extensionName);
         }
 
-        let extensionRemoteFile = __this.extensionGiteeDepositoryUrl + "/" + __this.extensionName + "/release/" + __this.extensionVerisonName + ".zip";
+        const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
+        let extensionRemoteFile = `${__this.extensionRepositoryUrl.get(downloadSource)}/${__this.extensionName}/release/${__this.extensionVerisonName}.zip`;
         let extensionLocalFile = __this.avzDir + "/inc/extension.zip";
         __this.fileManager.downloadFile(extensionRemoteFile, extensionLocalFile).then(file => {
             execSync(__this.avzDir + "/7z/7z.exe x " + __this.avzDir + "/inc/extension.zip -aoa -o" + __this.avzDir + "/inc");

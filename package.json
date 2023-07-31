@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.4.6",
+    "version": "0.4.7",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -61,8 +61,7 @@
             "path": "./snippets/snippets.json"
         }],
         "configuration": {
-            "type": "object",
-            "title": "AvZ Configure",
+            "title": "AvZ",
             "properties": {
                 "avzConfigure.avzDir": {
                     "type": "string",
@@ -83,6 +82,12 @@
                     "type": "string",
                     "default": "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__  &&  \"__AVZ_DIR__/bin/injector.exe\"",
                     "description": " AvZ 执行脚本命令, 在生成运行命令时, __FILE_NAME__ 会被脚本路径替换, __AVZ_DIR__ 会被 AvZ 环境包根目录替换, __COMPILER_CMD__ 会被 [AvZ 编译脚本命令] 替换."
+                },
+                "avzConfigure.downloadSource": {
+                    "type": "string",
+                    "default": "GitLab",
+                    "enum": ["GitHub", "GitLab", "Gitee"],
+                    "description": "AvZ 和插件的下载源"
                 }
             }
         }
