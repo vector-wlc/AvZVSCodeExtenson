@@ -6,7 +6,7 @@
  */
 import * as vscode from 'vscode';
 import * as fs from "fs";
-import * as http from "https"
+import * as http from "https";
 
 
 export class FileManager {
@@ -53,7 +53,7 @@ export class FileManager {
                 }).on('error', (err) => {
                     fs.unlinkSync(dest);
                     vscode.window.showErrorMessage("下载文件 " + url + " 失败");
-                })
+                });
                 res.on('end', () => {
                 });
                 res.pipe(file);
@@ -65,10 +65,10 @@ export class FileManager {
 
 
     public downloadToPick(remote: string, local: string, title: string): Promise<string> {
-        let __this = this;
+        let _this = this;
         let promise = new Promise<string>(function (callback, reject) {
-            __this.downloadFile(remote, local).then(localFile => {
-                let list = __this.readFile(localFile);
+            _this.downloadFile(remote, local).then(localFile => {
+                let list = _this.readFile(localFile);
                 if (list.length === 0) {
                     return;
                 }

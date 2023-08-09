@@ -2,12 +2,11 @@
  * @Coding: utf-8
  * @Author: vector-wlc
  * @Date: 2021-08-16 10:34:16
- * @Description: 
+ * @Description:
  */
 
 import * as vscode from 'vscode';
 import { Avz } from './avz';
-import * as http from "https"
 
 
 let avz = new Avz();
