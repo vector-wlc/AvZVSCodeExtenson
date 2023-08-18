@@ -41,26 +41,13 @@ export class Avz {
     }
 
     private setRunScriptCmd() {
-        const str = vscode.workspace.getConfiguration().get('avzConfigure.avzCompilerCmd');
-        let avzCompilerCmd: string;
-        if (str) {
-            avzCompilerCmd = <string>str;
-        } else {
-            avzCompilerCmd = template_strs.COMPILER_CMD;
-            vscode.workspace.getConfiguration().update('avzConfigure.avzRunScriptCmd', this.runScriptCmd, true);
-        }
-        const result = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd');
-        if (result) {
-            this.runScriptCmd = <string>result;
-        } else {
-            this.runScriptCmd = template_strs.RUN_SCRIPT_CMD;
-            vscode.workspace.getConfiguration().update('avzConfigure.avzRunScriptCmd', this.runScriptCmd, true);
-        }
+        let avzCompilerCmd: string = vscode.workspace.getConfiguration().get('avzConfigure.avzCompilerCmd')!;
+        this.runScriptCmd = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd')!;
         this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__COMPILER_CMD__", avzCompilerCmd);
         this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__AVZ_DIR__", this.avzDir);
     }
 
-    private isCanRun(): boolean {
+    private isRunnable(): boolean {
         if (!this.workspaceRoot) {
             this.workspaceRoot = vscode.workspace.workspaceFolders; // 再次检查有没有打开文件夹
             if (!this.workspaceRoot) {
@@ -79,30 +66,23 @@ export class Avz {
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
         this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile, false);
-        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON, false);
+        //this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON, false);
         this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON, false);
         this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile, false);
     }
 
     public setAvzDir(avzDir: string = ""): void {
-        if (!this.isCanRun()) {
+        if (!this.isRunnable()) {
             return;
         }
         if (avzDir === "") {
-            const result = vscode.workspace.getConfiguration().get('avzConfigure.avzDir');
-            if (result) {
-                avzDir = <string>result;
-            } else {
-                avzDir = this.workspaceRoot![0].uri.fsPath;
-            }
+            avzDir = vscode.workspace.getConfiguration().get('avzConfigure.avzDir') ?? this.workspaceRoot![0].uri.fsPath;
         }
 
         avzDir = this.fileManager.strReplaceAll(avzDir, "\\", "/");
-        let oneDirs = fs.readdirSync(avzDir);
-        for (let oneDir of oneDirs) {
+        for (let oneDir of fs.readdirSync(avzDir)) {
             if (oneDir.search("AsmVsZombies") !== -1) { // 找到 AsmVsZombies 文件夹
-                let twoDirs = fs.readdirSync(avzDir + "/" + oneDir);
-                for (let twoDir of twoDirs) {
+                for (let twoDir of fs.readdirSync(avzDir + "/" + oneDir)) {
                     if (twoDir.search("MinGW") !== -1 || twoDir.search("inc") !== -1) { // 确定 AsmVsZombies 子目录
                         this.avzDir = avzDir + "/" + oneDir;
                         vscode.window.showInformationMessage("已找到 AvZ 安装目录 : " + this.avzDir);
@@ -134,16 +114,13 @@ export class Avz {
     }
 
     private killGdb() {
-
         try {
             execSync("taskkill /F /IM gdb32.exe");
-        } catch (e) {
-
-        }
+        } catch (e) {}
     }
 
     public runScript() {
-        if (!this.isCanRun()) {
+        if (!this.isRunnable()) {
             return;
         }
 
@@ -172,19 +149,8 @@ export class Avz {
         return fs.existsSync(clangPath) ? "env2" : "env1";
     }
 
-    private getAvzListWithEnv(vList: string[]): string[] {
-        let envVersion = this.getAvzEnvVersion();
-        let ret: string[] = [];
-        for (let index = 0; index < vList.length; index++) {
-            if (vList[index].indexOf(envVersion) >= 0) {
-                ret.push(vList[index]);
-            }
-        }
-        return ret;
-    }
-
     public getAvzVersionList(): void {
-        if (!this.isCanRun()) {
+        if (!this.isRunnable()) {
             return;
         }
 
@@ -201,7 +167,7 @@ export class Avz {
                 if (avzVersionList.length === 0) {
                     return;
                 }
-                avzVersionList = this.getAvzListWithEnv(avzVersionList);
+                avzVersionList = avzVersionList.filter(x => x.startsWith(this.getAvzEnvVersion()));
                 const options: vscode.QuickPickOptions = {
                     title: "请选择 AvZ 版本"
                 };
@@ -209,7 +175,7 @@ export class Avz {
                     if (avzVersion && avzVersion.length !== 0) {
                         let avzVersionUrl = `${this.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
                         let avzFilePath = this.avzDir + "/" + "avz.zip";
-                        this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(avzVersionTxtPath => {
+                        this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(_ => {
                             execSync(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
                             vscode.window.showInformationMessage("AvZ 更新成功");
                         });
@@ -221,12 +187,7 @@ export class Avz {
 
     public getPvzExePath(): string {
         // 得到 pvzExeName
-        const result = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName');
-        if (result) {
-            this.pvzExeName = <string>result;
-        } else {
-            vscode.workspace.getConfiguration().update('avzConfigure.pvzExeName', this.pvzExeName, true);
-        }
+        this.pvzExeName = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName')!;
 
         // 寻找 Path
         let output = execSync("wmic process where name=\"" + this.pvzExeName + "\" get ExecutablePath").toString();
@@ -240,14 +201,8 @@ export class Avz {
     }
 
     public getPvzProcessId(): string {
-
         // 得到 pvzExeName
-        const result = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName');
-        if (result) {
-            this.pvzExeName = <string>result;
-        } else {
-            vscode.workspace.getConfiguration().update('avzConfigure.pvzExeName', this.pvzExeName, true);
-        }
+        this.pvzExeName = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName')!;
 
         // 寻找 PID
         let output = execSync("tasklist |find /i \"" + this.pvzExeName + "\"").toString();
@@ -266,8 +221,7 @@ export class Avz {
             return;
         }
         const strList = _this.fileManager.readFile(_this.avzDir + "/inc/libavz.h");
-        for (let index = 0; index < strList.length; index++) {
-            const element = strList[index];
+        for (const element of strList) {
             if (element.indexOf("__AVZ_VERSION__") !== -1) {
                 _this.avzVersion = element.split(" ")[2];
                 _this.avzVersion = "20" + _this.avzVersion.substring(0, 2) + "_" + _this.avzVersion.substring(2, 4) + "_" + _this.avzVersion.substring(4, 6);
@@ -277,7 +231,7 @@ export class Avz {
     }
 
     public getExtensionList(): void {
-        if (!this.isCanRun()) {
+        if (!this.isRunnable()) {
             return;
         }
 
@@ -349,23 +303,25 @@ export class Avz {
         // 读取插件的依赖列表
         let extensionName = _this.extensionName.split("/")[1];
         const strList = _this.fileManager.readFile(_this.avzDir + "/inc/" + extensionName + "/information.txt");
-        for (let idx = 0; idx < strList.length; ++idx) {
-            if (strList[idx] === "") {
+        let lineNumber = 0;
+        for (const line in strList) {
+            if (line === "") {
                 continue;
             }
-            if (idx === 1) { // AvZ Version
+            if (lineNumber === 1) { // AvZ Version
                 _this.getAvzVersion(_this);
-                let needAvzVersion = strList[idx].split(" ")[1];
+                let needAvzVersion = line.split(" ")[1];
                 if (needAvzVersion.indexOf(_this.avzVersion) === -1) {
                     vscode.window.showWarningMessage("您下载的插件 " + extensionName + " 依赖的 AvZ 版本为 " + needAvzVersion +
                         ", 但是现在的 AvZ 版本为 " + _this.avzVersion + ", 这可能带来不兼容问题!");
                 }
-            } else if (idx > 1) {
-                let tempList = strList[idx].split(" ");
+            } else if (lineNumber > 1) {
+                let tempList = line.split(" ");
                 _this.extensionName = this.getExtensionFullName(tempList[0]);
                 _this.extensionVersionName = tempList[1];
                 await _this.installExtension(_this);
             }
+            lineNumber++;
         }
         vscode.window.showInformationMessage("插件: " + _this.extensionName.split("/")[1] + " 安装结束");
     }

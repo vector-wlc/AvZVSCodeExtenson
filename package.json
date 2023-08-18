@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.4.8",
+    "version": "0.4.9",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -75,7 +75,7 @@
                 },
                 "avzConfigure.avzCompilerCmd": {
                     "type": "string",
-                    "default": "-m32 -static -std=c++20 -fexperimental-library -g -Wall -Werror=return-type \"__FILE_NAME__\" -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -ldbghelp -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\"",
+                    "default": "-m32 -static -std=c++20 -fexperimental-library -g -Wall -Werror=return-type -Werror=unused-result \"__FILE_NAME__\" -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -ldbghelp -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\"",
                     "description": "AvZ 编译脚本命令, 在生成编译命令时,  __FILE_NAME__ 会被脚本路径替换, __AVZ_DIR__ 会被 AvZ 环境包根目录替换. "
                 },
                 "avzConfigure.avzRunScriptCmd": {

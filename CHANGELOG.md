@@ -2,9 +2,13 @@
  * @Coding: utf-8
  * @Author: vector-wlc
  * @Date: 2021-08-16 10:34:16
- * @Description: 
+ * @Description:
 -->
 # Change Log
+
+## [0.4.9]
+
+* 更新 AvZ 脚本编译命令
 
 ## [0.4.8]
 
