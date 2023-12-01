@@ -63,10 +63,11 @@ export class Avz {
         let projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
         let cCppJsonFile = this.fileManager.strReplaceAll(template_strs.C_CPP_JSON, "__AVZ_DIR__", this.avzDir);
         let launchJsonFile = this.fileManager.strReplaceAll(template_strs.LAUNCH_JSON, "__AVZ_DIR__", this.avzDir);
+        let settingsJsonFile = this.fileManager.strReplaceAll(template_strs.SETTINGS_JSON, "__AVZ_DIR__", this.avzDir);
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
         this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile, false);
-        //this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.SETTINGS_JSON, false);
+        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", settingsJsonFile, false);
         this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON, false);
         this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile, false);
     }
@@ -116,7 +117,7 @@ export class Avz {
     private killGdb() {
         try {
             execSync("taskkill /F /IM gdb32.exe");
-        } catch (e) {}
+        } catch (e) { }
     }
 
     public runScript() {
@@ -192,7 +193,7 @@ export class Avz {
         // 寻找 Path
         let output = execSync("wmic process where name=\"" + this.pvzExeName + "\" get ExecutablePath").toString();
         let pvzExePathList = output.split("\n");
-        if (pvzExePathList[1].indexOf('PlantsVsZombies.exe') >= 0) {
+        if (pvzExePathList[1].indexOf(this.pvzExeName) >= 0) {
             let pvzExePath = pvzExePathList[1].trim();
             return pvzExePath;
         }
