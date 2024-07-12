@@ -5,7 +5,7 @@
  * @Description:
  */
 
-export const C_CPP_JSON = `{
+export const C_CPP_JSON = String.raw`{
     "configurations": [{
         "name": "Windows",
         "includePath": [
@@ -17,12 +17,12 @@ export const C_CPP_JSON = `{
     "version": 4
 }`;
 
-export const SETTINGS_JSON = `{
+export const SETTINGS_JSON = String.raw`{
     // 解注这条语句实现保存时格式化
-    // "editor.formatOnSave": true, 
-    
+    // "editor.formatOnSave": true,
+
     // AvZ 库的代码格式化方式，也可在根目录创建 .clang-format 文件粘贴 { BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true } 实现相同的功能
-    // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true }", 
+    // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true }",
 
     // 解注这条语句关闭 Cpp 插件的报错提示
     // "C_Cpp.errorSquiggles": "disabled",
@@ -35,7 +35,7 @@ export const SETTINGS_JSON = `{
     ],
 }`;
 
-export const LAUNCH_JSON = `{
+export const LAUNCH_JSON = String.raw`{
     "configurations": [
         {
             "name": "avz attach",
@@ -50,7 +50,7 @@ export const LAUNCH_JSON = `{
     ]
 }`;
 
-export const TASKS_JSON = `{
+export const TASKS_JSON = String.raw`{
     "tasks": [
         {
             "type": "shell",
@@ -59,4 +59,12 @@ export const TASKS_JSON = `{
         }
     ],
     "version": "2.0.0"
+}`;
+
+export const METADATA_JSON_ENV1 = String.raw`{
+    "compileOptions": "-std=c++1z __CUSTOM_ARGS__ \"__FILE_NAME__\" -I \"__AVZ_DIR__\\inc\" -lavz -lgdi32 -L \"__AVZ_DIR__\\bin\" -shared -o \"bin\\libavz.dll\""
+}`;
+
+export const METADATA_JSON_ENV2 = String.raw`{
+    "compileOptions": "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result __CUSTOM_ARGS__ \"__FILE_NAME__\" -I \"__AVZ_DIR__/inc\" -lavz -lgdi32 -ldbghelp -L \"__AVZ_DIR__/bin\" -shared -o \"./bin/libavz.dll\""
 }`;

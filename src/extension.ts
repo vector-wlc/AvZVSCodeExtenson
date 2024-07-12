@@ -8,7 +8,6 @@
 import * as vscode from 'vscode';
 import { Avz } from './avz';
 
-
 let avz = new Avz();
 
 // this method is called when your extension is activated

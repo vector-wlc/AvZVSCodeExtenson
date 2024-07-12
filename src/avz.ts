@@ -4,6 +4,7 @@
  * @Date: 2021-08-18 13:59:24
  * @Description:
  */
+
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { FileManager } from './file_manager';
@@ -23,14 +24,15 @@ export class Avz {
         ["Gitee", "https://gitee.com/qrmd/AvZLib/raw/main"],
     ]);
     private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
-    private runScriptCmd: string = "";
     private fileManager: FileManager = new FileManager;
     private avzDir: string = "";
+    private envType: number = 0;
     private pvzExeName: string = "PlantsVsZombies.exe";
     private extensionName: string = "";
     private extensionVersionName: string = "";
     private avzVersion: string = "";
     private extensionDownloadList: string[] = [];
+
     constructor() {
         vscode.window.terminals.forEach(terminal => {
             if (terminal.name === "AvZ") {
@@ -38,13 +40,6 @@ export class Avz {
                 return;
             }
         });
-    }
-
-    private setRunScriptCmd() {
-        let avzCompilerCmd: string = vscode.workspace.getConfiguration().get('avzConfigure.avzCompilerCmd')!;
-        this.runScriptCmd = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd')!;
-        this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__COMPILER_CMD__", avzCompilerCmd);
-        this.runScriptCmd = this.fileManager.strReplaceAll(this.runScriptCmd, "__AVZ_DIR__", this.avzDir);
     }
 
     private isRunnable(): boolean {
@@ -64,46 +59,47 @@ export class Avz {
         let cCppJsonFile = this.fileManager.strReplaceAll(template_strs.C_CPP_JSON, "__AVZ_DIR__", this.avzDir);
         let launchJsonFile = this.fileManager.strReplaceAll(template_strs.LAUNCH_JSON, "__AVZ_DIR__", this.avzDir);
         let settingsJsonFile = this.fileManager.strReplaceAll(template_strs.SETTINGS_JSON, "__AVZ_DIR__", this.avzDir);
+        let metadataJsonFile = this.envType === 1 ? template_strs.METADATA_JSON_ENV1 : template_strs.METADATA_JSON_ENV2;
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
         this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile, false);
         this.fileManager.writeFile(projectDir + "/.vscode/settings.json", settingsJsonFile, false);
         this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON, false);
         this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile, false);
+        this.fileManager.writeFile(this.avzDir + "/metadata.json", metadataJsonFile, false);
     }
 
     public setAvzDir(avzDir: string = ""): void {
         if (!this.isRunnable()) {
             return;
         }
+
         if (avzDir === "") {
-            avzDir = vscode.workspace.getConfiguration().get('avzConfigure.avzDir') ?? this.workspaceRoot![0].uri.fsPath;
+            avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir") ?? "";
+        }
+        if (avzDir === "") {
+            avzDir = this.workspaceRoot![0].uri.fsPath;
         }
 
         avzDir = this.fileManager.strReplaceAll(avzDir, "\\", "/");
-        for (let oneDir of fs.readdirSync(avzDir)) {
-            if (oneDir.search("AsmVsZombies") !== -1) { // 找到 AsmVsZombies 文件夹
-                for (let twoDir of fs.readdirSync(avzDir + "/" + oneDir)) {
-                    if (twoDir.search("MinGW") !== -1 || twoDir.search("inc") !== -1) { // 确定 AsmVsZombies 子目录
-                        this.avzDir = avzDir + "/" + oneDir;
-                        vscode.window.showInformationMessage("已找到 AvZ 安装目录 : " + this.avzDir);
-                        vscode.workspace.getConfiguration().update('avzConfigure.avzDir', this.avzDir, true);
-                        this.createAvzFiles();
-                        return;
-                    }
-                }
-            }
+        if (avzDir[avzDir.length - 1] === "/") {
+            avzDir = avzDir.substring(0, avzDir.length - 1);
+        }
 
-            if (oneDir.search("MinGW") !== -1 || oneDir.search("inc") !== -1) { // 确定 AsmVsZombies 子目录
-                this.avzDir = avzDir;
-                vscode.window.showInformationMessage("已找到 AvZ 安装目录 : " + this.avzDir);
-                vscode.workspace.getConfiguration().update('avzConfigure.avzDir', this.avzDir, true);
+        let subdirs = fs.readdirSync(avzDir).map(x => avzDir + "/" + x);
+        let dirs = [avzDir].concat(subdirs);
+        for (let dir of dirs) {
+            if (fs.existsSync(dir + "/MinGW")) { // 确定 AsmVsZombies 子目录
+                this.avzDir = dir;
+                this.envType = fs.existsSync(this.avzDir + "/MinGW/bin/libLLVM-15.dll") ? 2 : 1;
+                vscode.window.showInformationMessage("已找到 AvZ 安装目录: " + this.avzDir);
                 this.createAvzFiles();
+                vscode.workspace.getConfiguration().update("avzConfigure.avzDir", this.avzDir, false);
                 return;
             }
         }
 
-        vscode.window.showErrorMessage("未找到 AvZ 安装目录，请重新尝试运行命令: AvZ : Set AvZ Dir");
+        vscode.window.showErrorMessage("未找到有效 AvZ 安装目录，请重新尝试运行命令 AvZ: Set AvZ Dir");
     }
 
     public runCmd(cmd: string) {
@@ -128,26 +124,30 @@ export class Avz {
         if (this.avzDir === "") {
             this.setAvzDir();
         }
-
-        if (this.avzDir !== "") {
-            this.setRunScriptCmd();
-            if (vscode.window.activeTextEditor) {
-                vscode.window.activeTextEditor.document.save();
-                let fileName = vscode.window.activeTextEditor.document.fileName;
-                // 把调试进程强制杀掉
-                this.killGdb();
-                this.runCmd(this.runScriptCmd.replace("__FILE_NAME__", fileName));
-            }
+        if (this.avzDir === "") {
+            return;
         }
+        if (vscode.window.activeTextEditor === undefined) {
+            vscode.window.showErrorMessage("请打开需要运行的脚本文件");
+            return;
+        }
+
+        let metadata = JSON.parse(fs.readFileSync(this.avzDir + "/metadata.json", "utf8"));
+        let compileOptions: string = metadata.compileOptions;
+        let customOptions: string[] = vscode.workspace.getConfiguration().get('avzConfigure.compileOptions')!;
+        compileOptions = this.fileManager.strReplaceAll(compileOptions, "__CUSTOM_ARGS__", customOptions.join(" "));
+        let command: string = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd')!;
+        command = this.fileManager.strReplaceAll(command, "__COMPILER_CMD__", compileOptions);
+        command = this.fileManager.strReplaceAll(command, "__AVZ_DIR__", this.avzDir);
+        command = this.fileManager.strReplaceAll(command, "__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
+
+        vscode.window.activeTextEditor.document.save();
+        this.killGdb();
+        this.runCmd(command);
     }
 
     public setTerminalClosed() {
         this.avzTerminal = undefined;
-    }
-
-    private getAvzEnvVersion(): string {
-        let clangPath = this.avzDir + "/MinGW/bin/clang++.exe";
-        return fs.existsSync(clangPath) ? "env2" : "env1";
     }
 
     public getAvzVersionList(): void {
@@ -168,7 +168,7 @@ export class Avz {
                 if (avzVersionList.length === 0) {
                     return;
                 }
-                avzVersionList = avzVersionList.filter(x => x.startsWith(this.getAvzEnvVersion()));
+                avzVersionList = avzVersionList.filter(x => x.startsWith("env" + this.envType));
                 const options: vscode.QuickPickOptions = {
                     title: "请选择 AvZ 版本"
                 };

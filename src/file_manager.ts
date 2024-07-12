@@ -4,10 +4,10 @@
  * @Date: 2021-09-29 23:37:28
  * @Description:
  */
+
 import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as http from "https";
-
 
 export class FileManager {
     public mkDir(dirName: string): boolean {
@@ -26,11 +26,7 @@ export class FileManager {
                 return;
             }
         }
-        fs.writeFile(fileName, content, "utf-8", (err) => {
-            if (err) {
-                vscode.window.showErrorMessage("Write File : " + fileName + " Failed");
-            }
-        });
+        fs.writeFileSync(fileName, content, "utf8");
     }
 
     public strReplaceAll(str: string, subStr: string, newSubStr: string): string {
@@ -86,7 +82,7 @@ export class FileManager {
     }
 
     public readFile(fileName: string): string[] {
-        const str = fs.readFileSync(fileName, { encoding: 'utf8', flag: 'r' });
+        const str = fs.readFileSync(fileName, "utf8");
         let ret = this.strReplaceAll(str, "\r", "");
         let strList = ret.split("\n");
         while (strList[strList.length - 1] === "") {
