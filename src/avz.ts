@@ -7,6 +7,7 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as os from 'os';
 import { FileManager } from './file_manager';
 import * as template_strs from "./template_strs";
 import { execSync } from 'child_process';
@@ -25,6 +26,7 @@ export class Avz {
     ]);
     private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     private fileManager: FileManager = new FileManager;
+    private tmpDir: string;
     private avzDir: string = "";
     private envType: number = 0;
     private pvzExeName: string = "PlantsVsZombies.exe";
@@ -40,6 +42,8 @@ export class Avz {
                 return;
             }
         });
+        this.tmpDir = os.tmpdir() + "\\AsmVsZombies";
+        this.fileManager.mkDir(this.tmpDir);
     }
 
     private isRunnable(): boolean {
@@ -56,17 +60,13 @@ export class Avz {
 
     private createAvzFiles() {
         let projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
-        let cCppJsonFile = this.fileManager.strReplaceAll(template_strs.C_CPP_JSON, "__AVZ_DIR__", this.avzDir);
-        let launchJsonFile = this.fileManager.strReplaceAll(template_strs.LAUNCH_JSON, "__AVZ_DIR__", this.avzDir);
-        let settingsJsonFile = this.fileManager.strReplaceAll(template_strs.SETTINGS_JSON, "__AVZ_DIR__", this.avzDir);
-        let metadataJsonFile = this.envType === 1 ? template_strs.METADATA_JSON_ENV1 : template_strs.METADATA_JSON_ENV2;
         this.fileManager.mkDir(projectDir + "/.vscode");
         this.fileManager.mkDir(projectDir + "/bin");
-        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", cCppJsonFile, false);
-        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", settingsJsonFile, false);
-        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.TASKS_JSON, false);
-        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", launchJsonFile, false);
-        this.fileManager.writeFile(this.avzDir + "/metadata.json", metadataJsonFile, false);
+        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", template_strs.generateCCppJson(this.avzDir, this.envType), false);
+        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.generateSettingsJson(this.avzDir, this.envType), false);
+        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.generateTasksJson(this.avzDir, this.envType), false);
+        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", template_strs.generateLaunchJson(this.avzDir, this.envType), false);
+        this.fileManager.writeFile(this.avzDir + "/metadata.json", template_strs.generateMetadataJson(this.avzDir, this.envType), false);
     }
 
     public setAvzDir(avzDir: string = ""): void {
@@ -162,7 +162,7 @@ export class Avz {
         if (this.avzDir !== "") {
             const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
             let avzVersionTxtUrl = `${this.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
-            let avzVersionTxtPath = this.avzDir + "/version.txt";
+            let avzVersionTxtPath = this.tmpDir + "/version.txt";
             this.fileManager.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
                 let avzVersionList = this.fileManager.readFile(avzVersionTxtPath);
                 if (avzVersionList.length === 0) {
@@ -175,9 +175,9 @@ export class Avz {
                 vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => { // 得到版本文件
                     if (avzVersion && avzVersion.length !== 0) {
                         let avzVersionUrl = `${this.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
-                        let avzFilePath = this.avzDir + "/" + "avz.zip";
+                        let avzFilePath = this.tmpDir + "/avz.zip";
                         this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(_ => {
-                            execSync(this.avzDir + "/7z/7z.exe x " + this.avzDir + "/avz.zip -aoa -o" + this.avzDir);
+                            execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
                             vscode.window.showInformationMessage("AvZ 更新成功");
                         });
                     }
@@ -252,11 +252,11 @@ export class Avz {
         if (this.avzDir !== "") {
             const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
             let extensionListRemotePath = `${this.extensionRepositoryUrl.get(downloadSource)}/extension_list.txt`;
-            let extensionListLocalPath = this.avzDir + "/extension_list.txt";
+            let extensionListLocalPath = this.tmpDir + "/extension_list.txt";
             this.fileManager.downloadToPick(extensionListRemotePath, extensionListLocalPath, "请选择插件").then(extensionName => {
                 this.extensionName = extensionName;
                 let versionTxtRemotePath = `${this.extensionRepositoryUrl.get(downloadSource)}/${extensionName}/version.txt`;
-                let versionTxtLocalPath = this.avzDir + "/version.txt";
+                let versionTxtLocalPath = this.tmpDir + "/version.txt";
                 return this.fileManager.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, "请选择版本");
             }).then(versionName => {
                 this.extensionVersionName = versionName;
@@ -298,9 +298,10 @@ export class Avz {
 
         const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
         let extensionRemoteFile = `${_this.extensionRepositoryUrl.get(downloadSource)}/${_this.extensionName}/release/${_this.extensionVersionName}.zip`;
-        let extensionLocalFile = _this.avzDir + "/inc/extension.zip";
+        let extensionLocalFile = _this.tmpDir + "/extension.zip";
         await _this.fileManager.downloadFile(extensionRemoteFile, extensionLocalFile);
-        execSync(_this.avzDir + "/7z/7z.exe x " + _this.avzDir + "/inc/extension.zip -aoa -o" + _this.avzDir + "/inc");
+        execSync(`"${_this.avzDir}/7z/7z.exe" x "${extensionLocalFile}" -aoa -o"${_this.avzDir + "/inc"}"`);
+        vscode.window.showInformationMessage(`插件 ${_this.extensionName.split("/")[1]} 安装成功`);
         // 读取插件的依赖列表
         let extensionName = _this.extensionName.split("/")[1];
         const strList = _this.fileManager.readFile(_this.avzDir + "/inc/" + extensionName + "/information.txt");
@@ -324,6 +325,5 @@ export class Avz {
             }
             lineNumber++;
         }
-        vscode.window.showInformationMessage("插件: " + _this.extensionName.split("/")[1] + " 安装结束");
     }
 }
