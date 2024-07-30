@@ -60,6 +60,11 @@ export function activate(context: vscode.ExtensionContext) {
 		return avz.getExtensionList();
 	});
 
+
+	let buildAvZ = vscode.commands.registerCommand('AsmVsZombies.buildAvZ', () => {
+		return avz.build();
+	});
+
 	context.subscriptions.push(runScript);
 	context.subscriptions.push(updateAvz);
 	context.subscriptions.push(closeTerminal);
@@ -68,6 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(getPvzExePath);
 	context.subscriptions.push(getPvzProcessId);
 	context.subscriptions.push(getAvZExtension);
+	context.subscriptions.push(buildAvZ);
 }
 
 // this method is called when your extension is deactivated

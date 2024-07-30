@@ -21,7 +21,8 @@
         "onCommand:AsmVsZombies.setAvzDir",
         "onCommand:AsmVsZombies.getPvzExePath",
         "onCommand:AsmVsZombies.getPvzProcessId",
-        "onCommand:AsmVsZombies.getAvZExtension"
+        "onCommand:AsmVsZombies.getAvZExtension",
+        "onCommand:AsmVsZombies.buildAvZ"
     ],
     "keywords": [
         "avz",
@@ -58,6 +59,10 @@
             {
                 "command": "AsmVsZombies.getAvZExtension",
                 "title": "AvZ: Get AvZ Extension"
+            },
+            {
+                "command": "AsmVsZombies.buildAvZ",
+                "title": "AvZ: Build AvZ"
             }
         ],
         "menus": {

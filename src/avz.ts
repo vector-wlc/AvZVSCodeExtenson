@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { FileManager } from './file_manager';
 import * as template_strs from "./template_strs";
-import { execSync } from 'child_process';
+import { execSync, exec } from 'child_process';
 
 export class Avz {
     private avzTerminal: vscode.Terminal | undefined = undefined;
@@ -186,6 +186,8 @@ export class Avz {
         }
     }
 
+
+
     public getPvzExePath(): string {
         // 得到 pvzExeName
         this.pvzExeName = vscode.workspace.getConfiguration().get('avzConfigure.pvzExeName')!;
@@ -263,6 +265,107 @@ export class Avz {
                 this.installExtension(this, true);
             });
         }
+    }
+
+    // 如果数组中第一个元素是空串，代表正常运行，第二个元素为运行结果
+    // 否则，运行失败，第一个元素为失败原因
+    private execute(cmd: string): Promise<string[]> {
+        return new Promise<string[]>(function (callback, reject) {
+            exec(cmd, (error, stdout, stderr) => {
+                if (!error) {
+                    callback(["", stdout]);
+                    return;
+                }
+                callback([error?.message, stdout])
+            });
+        });
+    };
+
+    // 编译 avz 库
+    public build(): void {
+        if (this.avzDir === "") {
+            this.setAvzDir();
+        }
+        if (this.avzDir === "") {
+            return;
+        }
+        vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: '正在编译 AvZ 库'
+            },
+            async (progress) => {
+                let lastPercentage = 0;
+                let srcDir = fs.readdirSync(this.avzDir + "/src").filter(x => x.endsWith(".cpp"));
+                let total = srcDir.length;
+                let customOptions: string[] = vscode.workspace.getConfiguration().get('avzConfigure.compileOptions')!;
+                let compileCmd = template_strs.generateCompileCmd(this.avzDir, this.envType);
+                compileCmd = this.fileManager.strReplaceAll(compileCmd, "__CUSTOM_ARGS__", customOptions.join(" "));
+                let result = await this.execute("echo %number_of_processors%");
+                if (result[0].length !== 0) {
+                    vscode.window.showErrorMessage(result[0]);
+                    return;
+                }
+                let cpuCnt = Number(result[1]);
+                let finishCnt = 0;
+
+                // 多进程加速编译
+                const worker = async (idxs: number[]) => {
+                    for (const idx of idxs) {
+                        let cmd = this.fileManager.strReplaceAll(compileCmd, "__FILE_NAME__", this.avzDir + "/src/" + srcDir[idx]);
+                        let result = await this.execute(cmd);
+                        if (result[0].length !== 0) {
+                            vscode.window.showErrorMessage(result[0]);
+                            return;
+                        }
+                        ++finishCnt;
+                        let percentage = Math.round(finishCnt / total * 100);
+                        progress.report({
+                            message: `${percentage}%`,
+                            increment: percentage - lastPercentage
+                        });
+                        lastPercentage = percentage;
+                    }
+                };
+
+                // 分配任务
+                let totalIdxs: number[][] = new Array<number[]>(cpuCnt);
+                for (let i = 0; i < cpuCnt; ++i) {
+                    totalIdxs[i] = []
+                }
+
+                for (let i = 0; i < total; ++i) {
+                    totalIdxs[i % cpuCnt].push(i);
+                }
+
+                // 执行任务
+                for (const idxs of totalIdxs) {
+                    worker(idxs);
+                }
+
+                // 忙等待上述任务完成
+                const sleep = (ms: number) => {
+                    return new Promise(resolve => setTimeout(resolve, ms));
+                }
+
+                while (finishCnt != total) {
+                    await sleep(500);
+                }
+
+                try {
+                    execSync(template_strs.generatePackCmd(this.avzDir));
+                } catch (err) {
+                    vscode.window.showErrorMessage(`${err}, AvZ 打包失败`);
+                    return;
+                }
+
+                for (let i = 0; i < total; ++i) {
+                    fs.unlinkSync(this.avzDir + "/src/" + srcDir[i] + ".o");
+                }
+            }
+        );
+
     }
 
     private getExtensionFullName(extensionName: string): string {

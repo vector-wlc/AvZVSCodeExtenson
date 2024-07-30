@@ -43,8 +43,19 @@ export const generateLaunchJson = (avzDir: string, _: number) => `{
             "request": "attach",
             "processId": "\${command:pickProcess}",
             "program": "\${command:AsmVsZombies.getPvzExePath}",
+
+            // GDB
             "MIMode": "gdb",
             "miDebuggerPath": "${avzDir}/MinGW/bin/gdb32.exe",
+
+            // LLDB
+            // 注意 LLDB 能提供更好的调试体验（能显示 STL 的内存），但是使用此调试器时必须使用 32 位 AvZ2 环境包
+            // "MIMode": "lldb",
+            // "miDebuggerPath": "${avzDir}/MinGW/bin/lldb-mi.exe",
+
+            // LLDB 调试器会使得 dll 无法正常移除
+            // 因此使用 LLDB 时请注释此条命令
+            // 并在调试启动之前完成 AvZ:Run Script 等代码编译和注入操作 
             "preLaunchTask": "avz"
         }
     ]
@@ -64,3 +75,13 @@ export const generateTasksJson = (_1: string, _2: number) => `{
 export const generateMetadataJson = (_: string, envType: number) => `{
     "compileOptions": "${envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result"} __CUSTOM_ARGS__ \\"__FILE_NAME__\\" -isystem \\"__AVZ_DIR__/inc\\" -lavz ${envType === 1 ? "-lgdi32" : "-lgdi32 -ldbghelp"} -L \\"__AVZ_DIR__/bin\\" -shared -o \\"bin/libavz.dll\\""
 }`;
+
+
+export function generateCompileCmd(avzDir: string, envType: number): string {
+    let cmd1 = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++" `;
+    let cmd2 = envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result ";
+    let cmd3 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
+    return cmd1 + cmd2 + cmd3;
+}
+
+export const generatePackCmd = (avzDir: string) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -r "${avzDir}/bin/libavz.a" ${avzDir}/src/*.o`
