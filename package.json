@@ -16,6 +16,7 @@
     },
     "activationEvents": [
         "onCommand:AsmVsZombies.runScript",
+        "onCommand:AsmVsZombies.runScriptInTerminal",
         "onCommand:AsmVsZombies.updateAvz",
         "onCommand:AsmVsZombies.openAvzTutorial",
         "onCommand:AsmVsZombies.setAvzDir",
@@ -33,8 +34,12 @@
     "contributes": {
         "commands": [
             {
-                "command": "AsmVsZombies.runScript",
+                "command": "AsmVsZombies.runScriptInTerminal",
                 "title": "AvZ: Run Script"
+            },
+            {
+                "command": "AsmVsZombies.runScript",
+                "title": "AvZ: Run Script Mask Cmd"
             },
             {
                 "command": "AsmVsZombies.updateAvz",
@@ -69,7 +74,7 @@
             "editor/context": [
                 {
                     "when": "editorFocus",
-                    "command": "AsmVsZombies.runScript",
+                    "command": "AsmVsZombies.runScriptInTerminal",
                     "group": "navigation"
                 }
             ]

@@ -21,8 +21,13 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let runScript = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
-		avz.runScript();
+	let runScriptMaskCmd = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
+		avz.runScriptMaskCmd();
+	});
+
+
+	let runScriptInTerminal = vscode.commands.registerCommand('AsmVsZombies.runScriptInTerminal', () => {
+		avz.runScriptInTerminal();
 	});
 
 	let updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
@@ -65,7 +70,8 @@ export function activate(context: vscode.ExtensionContext) {
 		return avz.build();
 	});
 
-	context.subscriptions.push(runScript);
+	context.subscriptions.push(runScriptMaskCmd);
+	context.subscriptions.push(runScriptInTerminal);
 	context.subscriptions.push(updateAvz);
 	context.subscriptions.push(closeTerminal);
 	context.subscriptions.push(openAvzTutorial);

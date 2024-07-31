@@ -116,7 +116,7 @@ export class Avz {
         } catch (e) { }
     }
 
-    public runScript() {
+    private runScripImp(isMaskCmd: boolean) {
         if (!this.isRunnable()) {
             return;
         }
@@ -143,7 +143,19 @@ export class Avz {
 
         vscode.window.activeTextEditor.document.save();
         this.killGdb();
-        this.runCmd(command);
+        if (isMaskCmd) {
+            execSync(command);
+        } else {
+            this.runCmd(command);
+        }
+    }
+
+    public runScriptInTerminal() {
+        this.runScripImp(false);
+    }
+
+    public runScriptMaskCmd() {
+        this.runScripImp(true);
     }
 
     public setTerminalClosed() {
