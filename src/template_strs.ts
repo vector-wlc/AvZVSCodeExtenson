@@ -33,30 +33,36 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
         "-I${avzDir}/inc",
         "-std=${envType === 1 ? "c++14" : "c++2b"}"
     ],
+
+    // lldb-dap avz lldb executable-path 配置
+    // 未安装 lldb-dap 扩展此配置无效
+    "lldb-dap.executable-path": "${avzDir}/MinGW/bin/lldb-vscode.exe"
 }`;
 
 export const generateLaunchJson = (avzDir: string, _: number) => `{
     "configurations": [
+        // GDB 调试器
+        // 一个基础可用的调试器，调试体验不如 LLDB，但无需安装其他插件
+        // 开箱即用
         {
-            "name": "avz attach",
+            "name": "avz attach(gdb)",
             "type": "cppdbg",
             "request": "attach",
             "processId": "\${command:pickProcess}",
             "program": "\${command:AsmVsZombies.getPvzExePath}",
-
-            // GDB
             "MIMode": "gdb",
             "miDebuggerPath": "${avzDir}/MinGW/bin/gdb32.exe",
-
-            // LLDB
-            // 注意 LLDB 能提供更好的调试体验（能显示 STL 的内存），但是使用此调试器时必须使用 32 位 AvZ2 环境包
-            // "MIMode": "lldb",
-            // "miDebuggerPath": "${avzDir}/MinGW/bin/lldb-mi.exe",
-
-            // LLDB 调试器会使得 dll 无法正常移除
-            // 因此使用 LLDB 时请注释此条命令
-            // 并在调试启动之前完成 AvZ:Run Script 等代码编译和注入操作 
             "preLaunchTask": "avz"
+        },
+        // LLDB 调试器
+        // 注意 LLDB 能提供更好的调试体验（能显示 STL 的内存），但是使用此调试器时必须使用 32 位 AvZ2 环境包
+        // 并且需要安装 vscode 插件 LLDB-DAP， 并在插件的 Lldb-dap: Executable-path 设置项上填写 [AvZ环境包的根目录]/MinGW/bin/lldb-vscode.exe
+        {
+            "name": "avz attach(lldb)",
+            "type": "lldb-dap",
+            "request": "attach",
+            "program": "\${command:AsmVsZombies.getPvzExePath}",
+            "preLaunchTask": "avz",
         }
     ]
 }`;
