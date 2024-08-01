@@ -90,4 +90,4 @@ export function generateCompileCmd(avzDir: string, envType: number): string {
     return cmd1 + cmd2 + cmd3;
 }
 
-export const generatePackCmd = (avzDir: string) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -r "${avzDir}/bin/libavz.a" ${avzDir}/src/*.o`
+export const generatePackCmd = (avzDir: string) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -crs "${avzDir}/bin/libavz.a" ${avzDir}/src/*.o`
