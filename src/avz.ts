@@ -66,6 +66,7 @@ export class Avz {
         this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.generateSettingsJson(this.avzDir, this.envType), false);
         this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.generateTasksJson(this.avzDir, this.envType), false);
         this.fileManager.writeFile(projectDir + "/.vscode/launch.json", template_strs.generateLaunchJson(this.avzDir, this.envType), false);
+        this.fileManager.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
         this.fileManager.writeFile(this.avzDir + "/metadata.json", template_strs.generateMetadataJson(this.avzDir, this.envType), false);
     }
 
@@ -288,7 +289,7 @@ export class Avz {
                     callback(["", stdout]);
                     return;
                 }
-                callback([error?.message, stdout])
+                callback([error?.message, stdout]);
             });
         });
     };
@@ -339,7 +340,7 @@ export class Avz {
             // 分配任务
             let totalIdxs: number[][] = new Array<number[]>(cpuCnt);
             for (let i = 0; i < cpuCnt; ++i) {
-                totalIdxs[i] = []
+                totalIdxs[i] = [];
             }
 
             for (let i = 0; i < total; ++i) {
@@ -354,9 +355,9 @@ export class Avz {
             // 忙等待上述任务完成
             const sleep = (ms: number) => {
                 return new Promise(resolve => setTimeout(resolve, ms));
-            }
+            };
 
-            while (finishCnt != total) {
+            while (finishCnt !== total) {
                 await sleep(500);
             }
 
