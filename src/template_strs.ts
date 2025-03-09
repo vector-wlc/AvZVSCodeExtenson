@@ -31,7 +31,9 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
     // 未安装 clangd vsc 扩展此配置无效
     "clangd.fallbackFlags": [
         "-I${avzDir}/inc",
-        "-std=${envType === 1 ? "c++14" : "c++2b"}"
+        "-m32",
+        "-std=${envType === 1 ? "c++14" : "c++20"}",
+        ${envType === 1 ? "" : '"-fexperimental-library"'}
     ],
 
     // lldb-dap avz lldb executable-path 配置
