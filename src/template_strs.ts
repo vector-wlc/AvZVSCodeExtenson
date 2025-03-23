@@ -27,6 +27,10 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
     // 解注这条语句关闭 Cpp 插件的报错提示
     // "C_Cpp.errorSquiggles": "disabled",
 
+    // clangd 可执行文件路径
+    // 未安装 clangd vsc 扩展此配置无效
+    "clangd.path": "${avzDir}/MinGW/bin/clangd.exe",
+
     // clangd avz 配置命令
     // 未安装 clangd vsc 扩展此配置无效
     "clangd.fallbackFlags": [
@@ -80,15 +84,15 @@ export const generateTasksJson = (_1: string, _2: number) => `{
     "version": "2.0.0"
 }`;
 
-export const generateClangFormat = (_1: string, _2: number) => `---
+export const generateClangFormat = (_1: string, _2: number) => `
 # AvZ 库的代码格式化方式
 BasedOnStyle: WebKit
 AlignTrailingComments: true
 Cpp11BracedListStyle: true
 BreakBeforeBraces: Attach
-PackConstructorInitializers: NextLineOnly
+BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
-...`;
+`.trim();
 
 export const generateMetadataJson = (_: string, envType: number) => `{
     "compileOptions": "${envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result"} __CUSTOM_ARGS__ \\"__FILE_NAME__\\" -isystem \\"__AVZ_DIR__/inc\\" -lavz ${envType === 1 ? "-lgdi32" : "-lgdi32 -ldbghelp"} -L \\"__AVZ_DIR__/bin\\" -shared -o \\"bin/libavz.dll\\""
