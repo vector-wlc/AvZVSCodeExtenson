@@ -13,6 +13,8 @@ import * as template_strs from "./template_strs";
 import { execSync, exec } from 'child_process';
 
 export class Avz {
+    private static readonly clangdId: string = "llvm-vs-code-extensions.vscode-clangd";
+
     private avzTerminal: vscode.Terminal | undefined = undefined;
     private avzRepositoryUrl: Map<string, string> = new Map([
         ["GitHub", "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
@@ -66,8 +68,11 @@ export class Avz {
         this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.generateSettingsJson(this.avzDir, this.envType), false);
         this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.generateTasksJson(this.avzDir, this.envType), false);
         this.fileManager.writeFile(projectDir + "/.vscode/launch.json", template_strs.generateLaunchJson(this.avzDir, this.envType), false);
-        this.fileManager.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
         this.fileManager.writeFile(this.avzDir + "/metadata.json", template_strs.generateMetadataJson(this.avzDir, this.envType), false);
+
+        if (vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
+            this.fileManager.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
+        }
     }
 
     public setAvzDir(avzDir: string = ""): void {
