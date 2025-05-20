@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.5.5",
+    "version": "0.6.0",
     "engines": {
         "vscode": "^1.27.0"
     },
@@ -35,39 +35,39 @@
         "commands": [
             {
                 "command": "AsmVsZombies.runScriptInTerminal",
-                "title": "AvZ: Run Script"
+                "title": "%AsmVsZombies.runScriptInTerminal.title%"
             },
             {
                 "command": "AsmVsZombies.runScript",
-                "title": "AvZ: Run Script Mask Cmd"
+                "title": "%AsmVsZombies.runScript.title%"
             },
             {
                 "command": "AsmVsZombies.updateAvz",
-                "title": "AvZ: Update"
+                "title": "%AsmVsZombies.updateAvz.title%"
             },
             {
                 "command": "AsmVsZombies.openAvzTutorial",
-                "title": "AvZ: Open Tutorial"
+                "title": "%AsmVsZombies.openAvzTutorial.title%"
             },
             {
                 "command": "AsmVsZombies.setAvzDir",
-                "title": "AvZ: Set AvZ Dir"
+                "title": "%AsmVsZombies.setAvzDir.title%"
             },
             {
                 "command": "AsmVsZombies.getPvzExePath",
-                "title": "AvZ: Get PvZ Exe Name"
+                "title": "%AsmVsZombies.getPvzExePath.title%"
             },
             {
                 "command": "AsmVsZombies.getPvzProcessId",
-                "title": "AvZ: Get PvZ Process Id"
+                "title": "%AsmVsZombies.getPvzProcessId.title%"
             },
             {
                 "command": "AsmVsZombies.getAvZExtension",
-                "title": "AvZ: Get AvZ Extension"
+                "title": "%AsmVsZombies.getAvZExtension.title%"
             },
             {
                 "command": "AsmVsZombies.buildAvZ",
-                "title": "AvZ: Build AvZ"
+                "title": "%AsmVsZombies.buildAvZ.title%"
             }
         ],
         "menus": {
@@ -91,12 +91,12 @@
                 "avzConfigure.avzDir": {
                     "type": "string",
                     "default": "",
-                    "description": "AvZ 安装路径"
+                    "description": "%avzConfigure.avzDir.description%"
                 },
                 "avzConfigure.pvzExeName": {
                     "type": "string",
                     "default": "PlantsVsZombies.exe",
-                    "description": "PvZ 可执行文件名称"
+                    "description": "%avzConfigure.pvzExeName.description%"
                 },
                 "avzConfigure.compileOptions": {
                     "type": "array",
@@ -107,12 +107,12 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "AvZ 编译脚本时的额外编译选项"
+                    "description": "%avzConfigure.compileOptions.description%"
                 },
                 "avzConfigure.avzRunScriptCmd": {
                     "type": "string",
                     "default": "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__  &&  \"__AVZ_DIR__/bin/injector.exe\"",
-                    "description": " AvZ 执行脚本命令, 在生成运行命令时, __FILE_NAME__ 会被脚本路径替换, __AVZ_DIR__ 会被 AvZ 环境包根目录替换, __COMPILER_CMD__ 会被 [AvZ 编译脚本命令] 替换."
+                    "description": "%avzConfigure.avzRunScriptCmd.description%"
                 },
                 "avzConfigure.downloadSource": {
                     "type": "string",
@@ -122,7 +122,7 @@
                         "GitLab",
                         "Gitee"
                     ],
-                    "description": "AvZ 和插件的下载源"
+                    "description": "%avzConfigure.downloadSource.description%"
                 }
             }
         }

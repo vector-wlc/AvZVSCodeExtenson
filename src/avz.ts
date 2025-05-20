@@ -72,6 +72,12 @@ export class Avz {
 
         if (vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
             this.fileManager.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
+        } else if (this.envType === 2) { // AvZ 1 环境包中不包含 clangd
+            vscode.window.showInformationMessage("建议安装 clangd 扩展以获得更好的代码提示和格式化体验", "前往安装").then((selection) => {
+                if (selection === "前往安装") {
+                    vscode.commands.executeCommand("extension.open", Avz.clangdId);
+                }
+            });
         }
     }
 

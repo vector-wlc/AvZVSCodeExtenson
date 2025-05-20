@@ -11,6 +11,7 @@ export const generateCCppJson = (avzDir: string, envType: number) => `{
         "includePath": [
             "${avzDir}/inc"
         ],
+        "compilerPath": "${avzDir}/MinGW/bin/g++.exe",
         "cStandard": "c11",
         "cppStandard": "${envType === 1 ? "c++14" : "c++20"}"
     }],
@@ -18,6 +19,9 @@ export const generateCCppJson = (avzDir: string, envType: number) => `{
 }`;
 
 export const generateSettingsJson = (avzDir: string, envType: number) => `{
+    // 隐藏内联提示
+    "editor.inlayHints.enabled": "offUnlessPressed",
+
     // 解注这条语句实现保存时格式化
     // "editor.formatOnSave": true,
 
@@ -92,7 +96,7 @@ Cpp11BracedListStyle: true
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
-`.trim();
+`.trimLeft();
 
 export const generateMetadataJson = (_: string, envType: number) => `{
     "compileOptions": "${envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result"} __CUSTOM_ARGS__ \\"__FILE_NAME__\\" -isystem \\"__AVZ_DIR__/inc\\" -lavz ${envType === 1 ? "-lgdi32" : "-lgdi32 -ldbghelp"} -L \\"__AVZ_DIR__/bin\\" -shared -o \\"bin/libavz.dll\\""
