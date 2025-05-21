@@ -1,0 +1,17 @@
+{
+    "AsmVsZombies.runScriptInTerminal.title": "AvZ: 執行指令碼",
+    "AsmVsZombies.runScript.title": "AvZ: 執行指令碼（隱藏終端）",
+    "AsmVsZombies.updateAvz.title": "AvZ: 更新",
+    "AsmVsZombies.openAvzTutorial.title": "AvZ: 開啟教程",
+    "AsmVsZombies.setAvzDir.title": "AvZ: 設定 AvZ 目錄",
+    "AsmVsZombies.getPvzExePath.title": "AvZ: 獲取 PvZ 執行檔名稱",
+    "AsmVsZombies.getPvzProcessId.title": "AvZ: 獲取 PvZ 行程 ID",
+    "AsmVsZombies.getAvZExtension.title": "AvZ: 獲取 AvZ 擴充套件",
+    "AsmVsZombies.buildAvZ.title": "AvZ: 構建 AvZ",
+
+    "avzConfigure.avzDir.description": "AvZ 安裝路徑。",
+    "avzConfigure.pvzExeName.description": "PvZ 執行檔名稱。",
+    "avzConfigure.compileOptions.description": "AvZ 編譯指令碼時的額外編譯選項。",
+    "avzConfigure.avzRunScriptCmd.description": "AvZ 指令碼執行命令。\n在生成執行命令時，“__FILE_NAME__” 會被指令碼路徑替換，“__AVZ_DIR__” 會被 AvZ 環境包根目錄替換，“__COMPILER_CMD__” 會被 [AvZ 指令碼編譯命令] 替換。",
+    "avzConfigure.downloadSource.description": "AvZ 和 AvZ 擴充套件的下載源。"
+}
