@@ -1,0 +1,20 @@
+{
+  "Failed to download file \"{0}\"": "下載檔案 “{0}” 失敗",
+  "Open the AvZ installation directory": "開啟 AvZ 安裝目錄",
+  "You must have the folder open to execute the AvZ command": "您未開啟資料夾，無法執行 AvZ 命令",
+  "AvZ installation directory found: ": "已找到 AvZ 安裝目錄：",
+  "A valid AvZ installation directory was not found, try re-running the command \"AvZ: Set AvZ Dir\"": "未找到有效的 AvZ 安裝目錄，請嘗試重新執行命令 “AvZ: 設定 AvZ 目錄”",
+  "Please open the script file that needs to be run": "請開啟需要執行的指令碼檔案",
+  "Install": "前往安裝",
+  "It is recommended to install the clangd extension for a better code hinting and formatting experience.": "建議安裝 clangd 延伸模組以獲得更好的程式碼提示和格式化體驗。",
+  "Select AvZ version": "請選擇 AvZ 版本",
+  "AvZ updated successfully": "AvZ 更新成功",
+  "PvZ is not activated!": "PvZ 未啟動！",
+  "Select an extension": "請選擇擴充套件",
+  "Select version": "請選擇版本",
+  "Failed to package AvZ ({error})": "AvZ 打包失敗（{error}）",
+  "AvZ library being compiled": "正在編譯 AvZ 庫",
+  "You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.": "您已安裝過擴充套件 “{0}”，因此不再進行重複安裝。如果遇到版本相容性問題，請手動安裝該擴充套件的其他版本；如果實在解決不了問題，請聯絡擴充套件作者。",
+  "Extension \"{0}\" installed successfully": "擴充套件 “{0}” 安裝成功",
+  "The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!": "您下載的擴充套件 “{0}” 依賴的 AvZ 版本為 {1}, 但是現在的 AvZ 版本為 {2}, 這可能帶來不相容問題！"
+}

@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 			canSelectFolders: true,
 			canSelectFiles: false,
 			canSelectMany: false,
-			openLabel: '打开 AvZ 安装目录 (Open the AvZ installation directory)'
+			openLabel: vscode.l10n.t("Open the AvZ installation directory")
 		};
 
 		vscode.window.showOpenDialog(options).then(dir => {

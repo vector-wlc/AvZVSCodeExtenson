@@ -2,9 +2,9 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "VSCode Extension For PvZ TAS Framework : AsmVsZombies",
-    "version": "0.6.0",
+    "version": "0.6.2",
     "engines": {
-        "vscode": "^1.27.0"
+        "vscode": "^1.75.0"
     },
     "publisher": "vector-wlc",
     "categories": [
@@ -14,23 +14,13 @@
         "type": "git",
         "url": "https://github.com/vector-wlc/AvZVSCodeExtenson"
     },
-    "activationEvents": [
-        "onCommand:AsmVsZombies.runScript",
-        "onCommand:AsmVsZombies.runScriptInTerminal",
-        "onCommand:AsmVsZombies.updateAvz",
-        "onCommand:AsmVsZombies.openAvzTutorial",
-        "onCommand:AsmVsZombies.setAvzDir",
-        "onCommand:AsmVsZombies.getPvzExePath",
-        "onCommand:AsmVsZombies.getPvzProcessId",
-        "onCommand:AsmVsZombies.getAvZExtension",
-        "onCommand:AsmVsZombies.buildAvZ"
-    ],
     "keywords": [
         "avz",
         "pvz"
     ],
     "icon": "image/avz.ico",
     "main": "./out/extension.js",
+    "l10n": "./l10n",
     "contributes": {
         "commands": [
             {
@@ -136,7 +126,8 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
-        "@types/vscode": "^1.27.0",
+        "@types/vscode": "^1.75.0",
+        "@vscode/l10n-dev": "^0.0.35",
         "@types/glob": "^7.1.3",
         "@types/mocha": "^8.2.2",
         "@types/node": "14.x",

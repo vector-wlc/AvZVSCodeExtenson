@@ -39,7 +39,7 @@ export class FileManager {
             const file = fs.createWriteStream(dest);
             http.get(url, (res) => {
                 if (res.statusCode !== 200) {
-                    vscode.window.showErrorMessage("下载文件 " + url + " 失败");
+                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\"", url));
                     return;
                 }
 
@@ -48,7 +48,7 @@ export class FileManager {
                     callback(dest);
                 }).on('error', (err) => {
                     fs.unlinkSync(dest);
-                    vscode.window.showErrorMessage("下载文件 " + url + " 失败");
+                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\"", url));
                 });
                 res.on('end', () => {
                 });
