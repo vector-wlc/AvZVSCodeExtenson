@@ -4,16 +4,22 @@
  * @Date: 2021-08-16 10:34:16
  * @Description: 
 -->
-# AvZ README
+**简体中文** | **[English](./README.en.md)**
 
-VSCode Extension For PvZ TAS Framework : AsmVsZombies
+# AvZ VSCode Extension
 
-## Command
+用于 PvZ 键控框架 [AsmVsZombies](https://gitee.com/vector-wlc/AsmVsZombies) 的 VSCode 扩展。
 
-* 快捷键 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ : Set AvZ Dir` 选择 AvZ 安装目录
+## 用法
 
-* 右键选择 `AvZ : Run Script` 运行脚本
+* 查看使用教程：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: 打开教程`。
 
-* 快捷键 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ : Open Tutorial` 打开浏览器浏览使用教程
+* 进行 AvZ 版本的更新与回退：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: 更新`。
 
-* 快捷键 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ : Update` 进行 AvZ 版本的更新与退回
+* 选择 AvZ 安装目录：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: 设置 AvZ 目录`。
+
+* 运行脚本：点击鼠标右键后选择菜单中的 `AvZ: 运行脚本`。
+
+## 许可协议
+
+本项目使用 [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html) 许可进行授权。
