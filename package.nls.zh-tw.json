@@ -4,7 +4,7 @@
     "AsmVsZombies.updateAvz.title": "AvZ: 更新",
     "AsmVsZombies.openAvzTutorial.title": "AvZ: 開啟教程",
     "AsmVsZombies.setAvzDir.title": "AvZ: 設定 AvZ 目錄",
-    "AsmVsZombies.getPvzExePath.title": "AvZ: 獲取 PvZ 執行檔名稱",
+    "AsmVsZombies.getPvzExePath.title": "AvZ: 獲取 PvZ 執行檔路徑",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: 獲取 PvZ 行程 ID",
     "AsmVsZombies.getAvZExtension.title": "AvZ: 獲取 AvZ 擴充套件",
     "AsmVsZombies.buildAvZ.title": "AvZ: 構建 AvZ",

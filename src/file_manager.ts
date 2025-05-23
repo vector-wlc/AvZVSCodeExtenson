@@ -5,9 +5,9 @@
  * @Description:
  */
 
+import * as fs from 'fs';
+import * as http from 'https';
 import * as vscode from 'vscode';
-import * as fs from "fs";
-import * as http from "https";
 
 export class FileManager {
     public mkDir(dirName: string): boolean {
@@ -20,11 +20,10 @@ export class FileManager {
 
     public writeFile(fileName: string, content: string, isUnlink: boolean = true): void {
         if (fs.existsSync(fileName)) {
-            if (isUnlink) {
-                fs.unlinkSync(fileName);
-            } else {
+            if (!isUnlink) {
                 return;
             }
+            fs.unlinkSync(fileName);
         }
         fs.writeFileSync(fileName, content, "utf8");
     }
@@ -33,13 +32,12 @@ export class FileManager {
         return str.split(subStr).join(newSubStr);
     }
 
-
     public downloadFile(url: string, dest: string): Promise<string> {
-        let promise = new Promise<string>(function (callback, reject) {
+        return new Promise<string>(callback => {
             const file = fs.createWriteStream(dest);
             http.get(url, (res) => {
                 if (res.statusCode !== 200) {
-                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\"", url));
+                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url));
                     return;
                 }
 
@@ -48,23 +46,19 @@ export class FileManager {
                     callback(dest);
                 }).on('error', (err) => {
                     fs.unlinkSync(dest);
-                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\"", url));
+                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err.message})`);
                 });
-                res.on('end', () => {
-                });
+                res.on('end', () => { });
                 res.pipe(file);
             });
         });
-
-        return promise;
     }
 
 
     public downloadToPick(remote: string, local: string, title: string): Promise<string> {
-        let _this = this;
-        let promise = new Promise<string>(function (callback, reject) {
-            _this.downloadFile(remote, local).then(localFile => {
-                let list = _this.readFile(localFile);
+        return new Promise<string>(callback => {
+            this.downloadFile(remote, local).then(localFile => {
+                const list = this.readFile(localFile);
                 if (list.length === 0) {
                     return;
                 }
@@ -78,16 +72,16 @@ export class FileManager {
                 });
             });
         });
-        return promise;
     }
+
 
     public readFile(fileName: string): string[] {
         const str = fs.readFileSync(fileName, "utf8");
-        let ret = this.strReplaceAll(str, "\r", "");
-        let strList = ret.split("\n");
-        while (strList[strList.length - 1] === "") {
-            strList.pop();
+        const ret = this.strReplaceAll(str, "\r", "");
+        let lines = ret.split("\n");
+        while (lines[lines.length - 1] === "") {
+            lines.pop();
         }
-        return strList;
+        return lines;
     }
 }

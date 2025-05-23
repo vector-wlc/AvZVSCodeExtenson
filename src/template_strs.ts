@@ -96,7 +96,7 @@ Cpp11BracedListStyle: true
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
-`.trimLeft();
+`.trimStart();
 
 export const generateMetadataJson = (_: string, envType: number) => `{
     "compileOptions": "${envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result"} __CUSTOM_ARGS__ \\"__FILE_NAME__\\" -isystem \\"__AVZ_DIR__/inc\\" -lavz ${envType === 1 ? "-lgdi32" : "-lgdi32 -ldbghelp"} -L \\"__AVZ_DIR__/bin\\" -shared -o \\"bin/libavz.dll\\""

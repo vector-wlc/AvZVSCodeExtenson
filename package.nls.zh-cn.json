@@ -4,7 +4,7 @@
     "AsmVsZombies.updateAvz.title": "AvZ: 更新",
     "AsmVsZombies.openAvzTutorial.title": "AvZ: 打开教程",
     "AsmVsZombies.setAvzDir.title": "AvZ: 设置 AvZ 目录",
-    "AsmVsZombies.getPvzExePath.title": "AvZ: 获取 PvZ 可执行文件名称",
+    "AsmVsZombies.getPvzExePath.title": "AvZ: 获取 PvZ 可执行文件路径",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: 获取 PvZ 进程 ID",
     "AsmVsZombies.getAvZExtension.title": "AvZ: 获取 AvZ 插件",
     "AsmVsZombies.buildAvZ.title": "AvZ: 构建 AvZ",
