@@ -13,10 +13,10 @@
   "PvZ is not activated!": "PvZ 未啟動！",
   "PID of PvZ has been found: ": "已找到 PvZ 的行程 ID：",
   "PID of PvZ not found!": "未找到 PvZ 的行程 ID！",
-  "Select an extension": "請選擇擴充套件",
-  "Select version": "請選擇版本",
   "Failed to package AvZ! ({error})": "AvZ 打包失敗！（{error}）",
   "AvZ library being compiled": "正在編譯 AvZ 庫",
+  "Select extension": "請選擇擴充套件",
+  "Select version": "請選擇版本",
   "You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.": "您已安裝過擴充套件 “{0}”，因此不再進行重複安裝。如果遇到版本相容性問題，請手動安裝該擴充套件的其他版本；如果實在解決不了問題，請聯絡擴充套件作者。",
   "Extension \"{0}\" installed successfully.": "擴充套件 “{0}” 安裝成功！",
   "The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!": "您下載的擴充套件 “{0}” 依賴的 AvZ 版本為 {1}, 但是現在的 AvZ 版本為 {2}, 這可能帶來不相容問題！"

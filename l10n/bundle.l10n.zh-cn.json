@@ -13,10 +13,10 @@
   "PvZ is not activated!": "PvZ 未启动！",
   "PID of PvZ has been found: ": "已找到 PvZ 的进程 ID：",
   "PID of PvZ not found!": "未找到 PvZ 的进程 ID！",
-  "Select an extension": "请选择插件",
-  "Select version": "请选择版本",
   "Failed to package AvZ! ({error})": "AvZ 打包失败！（{error}）",
   "AvZ library being compiled": "正在编译 AvZ 库",
+  "Select extension": "请选择插件",
+  "Select version": "请选择版本",
   "You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.": "您已安装过插件 “{0}”，因此不再进行重复安装。如果遇到版本兼容性问题，请手动安装该插件的其他版本；如果实在解决不了问题，请联系插件作者。",
   "Extension \"{0}\" installed successfully.": "插件 “{0}” 安装成功！",
   "The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!": "您下载的插件 “{0}” 依赖的 AvZ 版本为 {1}, 但是现在的 AvZ 版本为 {2}, 这可能带来不兼容问题！"

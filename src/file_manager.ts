@@ -10,6 +10,11 @@ import * as http from 'https';
 import * as vscode from 'vscode';
 
 export class FileManager {
+    public static strReplaceAll(str: string, subStr: string, newSubStr: string): string {
+        return str.split(subStr).join(newSubStr);
+    }
+
+
     public mkDir(dirName: string): boolean {
         if (fs.existsSync(dirName)) {
             return true;
@@ -17,6 +22,18 @@ export class FileManager {
         fs.mkdirSync(dirName);
         return fs.existsSync(dirName);
     }
+
+
+    public readFile(fileName: string): string[] {
+        const str = fs.readFileSync(fileName, "utf8");
+        const ret = FileManager.strReplaceAll(str, "\r", "");
+        let lines = ret.split("\n");
+        while (lines.length > 0 && lines[lines.length - 1] === "") {
+            lines.pop();
+        }
+        return lines;
+    }
+
 
     public writeFile(fileName: string, content: string, isUnlink: boolean = true): void {
         if (fs.existsSync(fileName)) {
@@ -28,9 +45,6 @@ export class FileManager {
         fs.writeFileSync(fileName, content, "utf8");
     }
 
-    public strReplaceAll(str: string, subStr: string, newSubStr: string): string {
-        return str.split(subStr).join(newSubStr);
-    }
 
     public downloadFile(url: string, dest: string): Promise<string> {
         return new Promise<string>(callback => {
@@ -41,14 +55,13 @@ export class FileManager {
                     return;
                 }
 
-                file.on('finish', () => {
+                file.on("finish", () => {
                     file.close();
                     callback(dest);
-                }).on('error', (err) => {
+                }).on("error", (err) => {
                     fs.unlinkSync(dest);
-                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err.message})`);
+                    vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err})`);
                 });
-                res.on('end', () => { });
                 res.pipe(file);
             });
         });
@@ -62,26 +75,12 @@ export class FileManager {
                 if (list.length === 0) {
                     return;
                 }
-                const options: vscode.QuickPickOptions = {
-                    title: title
-                };
-                vscode.window.showQuickPick(list, options).then(str => {
+                vscode.window.showQuickPick(list, { title: title }).then(str => {
                     if (str && str.length !== 0) {
                         callback(str);
                     }
                 });
             });
         });
-    }
-
-
-    public readFile(fileName: string): string[] {
-        const str = fs.readFileSync(fileName, "utf8");
-        const ret = this.strReplaceAll(str, "\r", "");
-        let lines = ret.split("\n");
-        while (lines[lines.length - 1] === "") {
-            lines.pop();
-        }
-        return lines;
     }
 }

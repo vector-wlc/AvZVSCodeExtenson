@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "A VSCode extension for the PvZ TAS framework - AsmVsZombies.",
-    "version": "0.6.3",
+    "version": "0.6.4",
     "engines": {
         "vscode": "^1.75.0"
     },
@@ -101,7 +101,7 @@
                 },
                 "avzConfigure.avzRunScriptCmd": {
                     "type": "string",
-                    "default": "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__  &&  \"__AVZ_DIR__/bin/injector.exe\"",
+                    "default": "set \"PATH=__AVZ_DIR__/MinGW/bin;%PATH%\" && \"__AVZ_DIR__/MinGW/bin/g++\" __COMPILER_CMD__ && \"__AVZ_DIR__/bin/injector.exe\"",
                     "description": "%avzConfigure.avzRunScriptCmd.description%"
                 },
                 "avzConfigure.downloadSource": {

@@ -9,9 +9,9 @@
     "AsmVsZombies.getAvZExtension.title": "AvZ: Get AvZ Extension",
     "AsmVsZombies.buildAvZ.title": "AvZ: Build AvZ",
 
-    "avzConfigure.avzDir.description": "Path to the root directory of AvZ.",
-    "avzConfigure.pvzExeName.description": "Name of the PvZ executable.",
-    "avzConfigure.compileOptions.description": "Additional compilation options used by AvZ when compiling scripts.",
-    "avzConfigure.avzRunScriptCmd.description": "Command to run AvZ scripts.\nWhen generating the command, \"__FILE_NAME__\" will be replaced by the path to the script file, \"__AVZ_DIR__\" will be replaced by the path to the root directory of AvZ, \"___COMPILER_CMD__\" will be replaced by [AvZ Script Compile Command].",
+    "avzConfigure.avzDir.description": "Path to root directory of AvZ.",
+    "avzConfigure.pvzExeName.description": "Name of executable of PvZ.",
+    "avzConfigure.compileOptions.description": "Additional compilation options used by AvZ for compiling scripts.",
+    "avzConfigure.avzRunScriptCmd.description": "Command to run AvZ scripts.\nWhen generating the command, \"__FILE_NAME__\" will be replaced by path to the script file, \"__AVZ_DIR__\" will be replaced by path to root directory of AvZ, \"___COMPILER_CMD__\" will be replaced by [AvZ Script Compile Command].",
     "avzConfigure.downloadSource.description": "Download channel of AvZ and AvZ extensions."
 }

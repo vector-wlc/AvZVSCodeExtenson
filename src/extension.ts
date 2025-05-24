@@ -13,7 +13,6 @@ let avz = new Avz();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
 	let closeTerminal = vscode.window.onDidCloseTerminal(t => {
 		// Watch for when the server terminal closes.
 		if (t.name === "AvZ") {
@@ -24,7 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	let runScriptMaskCmd = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
 		avz.runScriptMaskCmd();
 	});
-
 
 	let runScriptInTerminal = vscode.commands.registerCommand('AsmVsZombies.runScriptInTerminal', () => {
 		avz.runScriptInTerminal();
