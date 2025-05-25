@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "A VSCode extension for the PvZ TAS framework - AsmVsZombies.",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "engines": {
         "vscode": "^1.75.0"
     },
@@ -25,7 +25,8 @@
         "commands": [
             {
                 "command": "AsmVsZombies.runScriptInTerminal",
-                "title": "%AsmVsZombies.runScriptInTerminal.title%"
+                "title": "%AsmVsZombies.runScriptInTerminal.title%",
+                "icon": "$(play)"
             },
             {
                 "command": "AsmVsZombies.runScript",
@@ -64,6 +65,13 @@
             "editor/context": [
                 {
                     "when": "editorFocus",
+                    "command": "AsmVsZombies.runScriptInTerminal",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title/run": [
+                {
+                    "when": "resourceLangId == cpp",
                     "command": "AsmVsZombies.runScriptInTerminal",
                     "group": "navigation"
                 }

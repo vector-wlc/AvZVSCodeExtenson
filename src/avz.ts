@@ -415,11 +415,10 @@ export class Avz {
     private async installExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false) {
         const extensionName = extensionFullName.split("/")[1];
 
-        // 已经下载过的插件不再进行下载
         const hasInstalled = this.extensionDownloadList.includes(extensionName);
         if (!hasInstalled) {
             this.extensionDownloadList.push(extensionName);
-        } else if (!isForceInstall) {
+        } else if (!isForceInstall) { // 已经下载过的插件不再进行下载
             vscode.window.showWarningMessage(vscode.l10n.t("You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.", extensionName));
             return;
         }

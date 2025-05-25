@@ -5,6 +5,7 @@ out/test/**
 src/**
 .gitignore
 .yarnrc
+README.en.md
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
