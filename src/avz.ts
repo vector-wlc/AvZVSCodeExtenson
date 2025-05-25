@@ -113,7 +113,7 @@ export class Avz {
 
 
     public runCmd(cmd: string): void {
-        this.avzTerminal = this.avzTerminal ?? vscode.window.createTerminal("AvZ", "cmd");
+        this.avzTerminal ??= vscode.window.createTerminal("AvZ", "cmd");
         this.avzTerminal.sendText(cmd);
         this.avzTerminal.show();
     }
@@ -271,7 +271,12 @@ export class Avz {
         if (this.avzDir === "") {
             return;
         }
-        const progressBuild = async (progress: any) => {
+
+        type Progress = vscode.Progress<{
+            message?: string;
+            increment?: number;
+        }>;
+        const progressBuild = async (progress: Progress) => {
             const srcFiles = fs.readdirSync(this.avzDir + "/src").filter(file => file.endsWith(".cpp"));
             const srcFileCnt = srcFiles.length;
             const customOptions: string[] = vscode.workspace.getConfiguration().get('avzConfigure.compileOptions')!;
@@ -279,7 +284,7 @@ export class Avz {
             compileCmd = FileManager.strReplaceAll(compileCmd, "__CUSTOM_ARGS__", customOptions.join(" "));
             const [error, stdout] = await Avz.execute("echo %number_of_processors%");
             if (error !== "") {
-                vscode.window.showErrorMessage(error);
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get number of processors. ({error})", { error: error }));
                 return;
             }
             let lastPercentage = 0;
@@ -289,14 +294,13 @@ export class Avz {
             // 多进程加速编译
             const worker = async (idxs: number[]) => {
                 for (const idx of idxs) {
-                    const cmd = FileManager.strReplaceAll(compileCmd, "__FILE_NAME__", `${this.avzDir}/src/${srcFiles[idx]}`);
+                    const srcFile = srcFiles[idx];
+                    const cmd = FileManager.strReplaceAll(compileCmd, "__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await Avz.execute(cmd);
-                    if (err !== "") {
-                        vscode.window.showErrorMessage(err);
-                        return;
+                    if (err !== "") { // 还不能 return, 否则进度条会卡住
+                        vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err }));
                     }
-                    ++finishCnt;
-                    const percentage = Math.round(finishCnt / srcFileCnt * 100);
+                    const percentage = Math.round(++finishCnt / srcFileCnt * 100);
                     progress.report({
                         message: `${percentage}%`,
                         increment: percentage - lastPercentage
@@ -330,7 +334,7 @@ export class Avz {
             try {
                 execSync(template_strs.generatePackCmd(this.avzDir));
             } catch (err) {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to package AvZ! ({error})", { error: err }));
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to package AvZ. ({error})", { error: err }));
                 return;
             }
 
@@ -341,14 +345,13 @@ export class Avz {
                 }
             }
         };
-        vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                cancellable: false,
-                title: vscode.l10n.t("AvZ library being compiled")
-            },
-            progressBuild
-        );
+
+        const progressOptions: vscode.ProgressOptions = {
+            location: vscode.ProgressLocation.Notification,
+            cancellable: false,
+            title: vscode.l10n.t("AvZ library being compiled")
+        };
+        vscode.window.withProgress(progressOptions, progressBuild);
     }
 
 

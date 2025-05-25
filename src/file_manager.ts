@@ -26,8 +26,7 @@ export class FileManager {
 
     public readFile(fileName: string): string[] {
         const str = fs.readFileSync(fileName, "utf8");
-        const ret = FileManager.strReplaceAll(str, "\r", "");
-        let lines = ret.split("\n");
+        let lines = FileManager.strReplaceAll(str, "\r", "").split("\n");
         while (lines.length > 0 && lines[lines.length - 1] === "") {
             lines.pop();
         }
@@ -76,7 +75,7 @@ export class FileManager {
                     return;
                 }
                 vscode.window.showQuickPick(list, { title: title }).then(str => {
-                    if (str && str.length !== 0) {
+                    if (str !== undefined && str !== "") {
                         callback(str);
                     }
                 });
