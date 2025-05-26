@@ -5,12 +5,13 @@
  * @Description:
  */
 
-import { execSync, exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { FileManager } from './file_manager';
 import * as template_strs from './template_strs';
+import * as utils from './utils';
+
 
 export class Avz {
     private static readonly avzRepositoryUrl: ReadonlyMap<string, string> = new Map([
@@ -31,19 +32,18 @@ export class Avz {
     private avzVersion: string = "";
     private envType: number = 0;
     private extensionDownloadList: string[] = [];
-    private fileManager: FileManager = new FileManager();
     private pvzExeName: string = "PlantsVsZombies.exe";
 
 
     constructor() {
-        this.fileManager.mkDir(this.tmpDir);
+        utils.mkDir(this.tmpDir);
     }
 
 
-    // 如果数组中第一个元素是空串，代表正常运行，第二个元素为运行结果
-    // 否则，运行失败，第一个元素为失败原因
-    private static execute(cmd: string): Promise<string[]> {
-        return new Promise<string[]>(callback => {
+    // 函数正常运行时, 元组中第一个元素为空字符串, 第二个元素为运行结果
+    // 运行失败时, 第一个元素为失败原因
+    private static execute(cmd: string): Promise<[err: string, out: string]> {
+        return new Promise<[string, string]>(callback => {
             exec(cmd, (error, stdout) => { callback([error?.message ?? "", stdout]); });
         });
     }
@@ -67,16 +67,16 @@ export class Avz {
 
     private createAvzFiles(): void {
         const projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
-        this.fileManager.mkDir(projectDir + "/bin");
-        this.fileManager.mkDir(projectDir + "/.vscode");
-        this.fileManager.writeFile(projectDir + "/.vscode/c_cpp_properties.json", template_strs.generateCCppJson(this.avzDir, this.envType), false);
-        this.fileManager.writeFile(projectDir + "/.vscode/settings.json", template_strs.generateSettingsJson(this.avzDir, this.envType), false);
-        this.fileManager.writeFile(projectDir + "/.vscode/tasks.json", template_strs.generateTasksJson(this.avzDir, this.envType), false);
-        this.fileManager.writeFile(projectDir + "/.vscode/launch.json", template_strs.generateLaunchJson(this.avzDir, this.envType), false);
+        utils.mkDir(projectDir + "/bin");
+        utils.mkDir(projectDir + "/.vscode");
+        utils.writeFile(projectDir + "/.vscode/c_cpp_properties.json", template_strs.generateCCppJson(this.avzDir, this.envType), false);
+        utils.writeFile(projectDir + "/.vscode/settings.json", template_strs.generateSettingsJson(this.avzDir, this.envType), false);
+        utils.writeFile(projectDir + "/.vscode/tasks.json", template_strs.generateTasksJson(this.avzDir, this.envType), false);
+        utils.writeFile(projectDir + "/.vscode/launch.json", template_strs.generateLaunchJson(this.avzDir, this.envType), false);
         if (vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
-            this.fileManager.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
+            utils.writeFile(projectDir + "/.clang-format", template_strs.generateClangFormat(this.avzDir, this.envType), false);
         }
-        this.fileManager.writeFile(this.avzDir + "/metadata.json", template_strs.generateMetadataJson(this.avzDir, this.envType), false);
+        utils.writeFile(this.avzDir + "/metadata.json", template_strs.generateMetadataJson(this.avzDir, this.envType), false);
     }
 
 
@@ -91,7 +91,7 @@ export class Avz {
             avzDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
         }
 
-        avzDir = FileManager.strReplaceAll(avzDir, "\\", "/");
+        avzDir = utils.strReplaceAll(avzDir, "\\", "/");
         if (avzDir.endsWith("/")) {
             avzDir = avzDir.substring(0, avzDir.length - 1);
         }
@@ -138,10 +138,10 @@ export class Avz {
         const customOptions: string[] = vscode.workspace.getConfiguration().get('avzConfigure.compileOptions')!;
         let command: string = vscode.workspace.getConfiguration().get('avzConfigure.avzRunScriptCmd')!;
         let compileOptions: string = metadata.compileOptions;
-        compileOptions = FileManager.strReplaceAll(compileOptions, "__CUSTOM_ARGS__", customOptions.join(" "));
-        command = FileManager.strReplaceAll(command, "__COMPILER_CMD__", compileOptions);
-        command = FileManager.strReplaceAll(command, "__AVZ_DIR__", this.avzDir);
-        command = FileManager.strReplaceAll(command, "__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
+        compileOptions = utils.strReplaceAll(compileOptions, "__CUSTOM_ARGS__", customOptions.join(" "));
+        command = utils.strReplaceAll(command, "__COMPILER_CMD__", compileOptions);
+        command = utils.strReplaceAll(command, "__AVZ_DIR__", this.avzDir);
+        command = utils.strReplaceAll(command, "__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
 
         vscode.window.activeTextEditor.document.save();
         Avz.killGdb();
@@ -197,8 +197,8 @@ export class Avz {
         const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
         const avzVersionTxtUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
         const avzVersionTxtPath = this.tmpDir + "/version.txt";
-        this.fileManager.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
-            const avzVersionList = this.fileManager.readFile(avzVersionTxtPath).filter(ver => ver.startsWith("env" + this.envType));
+        utils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(avzVersionTxtPath => { // 得到版本列表
+            const avzVersionList = utils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith("env" + this.envType));
             if (avzVersionList.length === 0) {
                 return;
             }
@@ -211,7 +211,7 @@ export class Avz {
                 }
                 const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
                 const avzFilePath = this.tmpDir + "/avz.zip";
-                this.fileManager.downloadFile(avzVersionUrl, avzFilePath).then(() => {
+                utils.downloadFile(avzVersionUrl, avzFilePath).then(() => {
                     execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
                     vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
                     this.recommendClangd();
@@ -281,7 +281,7 @@ export class Avz {
             const srcFileCnt = srcFiles.length;
             const customOptions: string[] = vscode.workspace.getConfiguration().get('avzConfigure.compileOptions')!;
             let compileCmd = template_strs.generateCompileCmd(this.avzDir, this.envType);
-            compileCmd = FileManager.strReplaceAll(compileCmd, "__CUSTOM_ARGS__", customOptions.join(" "));
+            compileCmd = utils.strReplaceAll(compileCmd, "__CUSTOM_ARGS__", customOptions.join(" "));
             const [error, stdout] = await Avz.execute("echo %number_of_processors%");
             if (error !== "") {
                 vscode.window.showErrorMessage(vscode.l10n.t("Failed to get number of processors. ({error})", { error: error }));
@@ -295,7 +295,7 @@ export class Avz {
             const worker = async (idxs: number[]) => {
                 for (const idx of idxs) {
                     const srcFile = srcFiles[idx];
-                    const cmd = FileManager.strReplaceAll(compileCmd, "__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
+                    const cmd = utils.strReplaceAll(compileCmd, "__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await Avz.execute(cmd);
                     if (err !== "") { // 还不能 return, 否则进度条会卡住
                         vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err }));
@@ -379,11 +379,11 @@ export class Avz {
         const extensionListRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/extension_list.txt`;
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
         let extensionFullName = "";
-        this.fileManager.downloadToPick(extensionListRemotePath, extensionListLocalPath, vscode.l10n.t("Select extension")).then(extension => {
+        utils.downloadToPick(extensionListRemotePath, extensionListLocalPath, vscode.l10n.t("Select extension")).then(extension => {
             extensionFullName = extension;
             const versionTxtRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extension}/version.txt`;
             const versionTxtLocalPath = this.tmpDir + "/version.txt";
-            return this.fileManager.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, vscode.l10n.t("Select version"));
+            return utils.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, vscode.l10n.t("Select version"));
         }).then(version => {
             this.installExtension(extensionFullName, version, true);
         });
@@ -394,7 +394,7 @@ export class Avz {
         if (this.avzVersion !== "") {
             return;
         }
-        const lines = this.fileManager.readFile(this.avzDir + "/inc/libavz.h");
+        const lines = utils.readFile(this.avzDir + "/inc/libavz.h");
         for (const line of lines) {
             if (line.includes("__AVZ_VERSION__")) {
                 this.avzVersion = line.split(" ")[2];
@@ -407,12 +407,12 @@ export class Avz {
 
     private getExtensionFullName(extensionName: string): string {
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
-        const extensionList = this.fileManager.readFile(extensionListLocalPath).map(line => line.trimEnd());
+        const extensionList = utils.readFile(extensionListLocalPath).map(line => line.trimEnd());
         return extensionList.find(extensionFullName => extensionFullName.endsWith(extensionName)) ?? extensionName;
     }
 
 
-    private async installExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false) {
+    private async installExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false): Promise<void> {
         const extensionName = extensionFullName.split("/")[1];
 
         const hasInstalled = this.extensionDownloadList.includes(extensionName);
@@ -426,11 +426,11 @@ export class Avz {
         const downloadSource: string = vscode.workspace.getConfiguration().get('avzConfigure.downloadSource')!;
         const extensionRemoteFile = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionLocalFile = this.tmpDir + "/extension.zip";
-        await this.fileManager.downloadFile(extensionRemoteFile, extensionLocalFile);
+        await utils.downloadFile(extensionRemoteFile, extensionLocalFile);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionLocalFile}" -aoa -o"${this.avzDir}/inc"`);
         vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" installed successfully.", extensionName));
         // 读取插件的依赖列表
-        const lines = this.fileManager.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trimEnd()).filter(line => line !== "");
+        const lines = utils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trimEnd()).filter(line => line !== "");
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.getAvzVersion();
