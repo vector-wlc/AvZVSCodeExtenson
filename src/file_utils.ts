@@ -9,12 +9,6 @@ import * as fs from 'fs';
 import * as http from 'https';
 import * as vscode from 'vscode';
 
-
-export function strReplaceAll(str: string, subStr: string, newSubStr: string): string {
-    return str.split(subStr).join(newSubStr);
-}
-
-
 export function mkDir(dirName: string): boolean {
     if (fs.existsSync(dirName)) {
         return true;
@@ -25,9 +19,8 @@ export function mkDir(dirName: string): boolean {
 
 
 export function readFile(fileName: string): string[] {
-    const str = fs.readFileSync(fileName, "utf8");
-    let lines = strReplaceAll(str, "\r", "").split("\n");
-    while (lines.length > 0 && lines[lines.length - 1] === "") {
+    let lines = fs.readFileSync(fileName, "utf8").replaceAll("\r", "").split("\n");
+    while (lines.at(-1) === "") {
         lines.pop();
     }
     return lines;
