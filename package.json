@@ -2,7 +2,7 @@
     "name": "avz",
     "displayName": "AvZ",
     "description": "A VSCode extension for the PvZ TAS framework - AsmVsZombies.",
-    "version": "0.6.6",
+    "version": "0.6.7",
     "engines": {
         "vscode": "^1.75.0"
     },
@@ -64,7 +64,7 @@
         "menus": {
             "editor/context": [
                 {
-                    "when": "editorFocus",
+                    "when": "editorFocus && editorLangId == cpp",
                     "command": "AsmVsZombies.runScriptInTerminal",
                     "group": "navigation"
                 }
