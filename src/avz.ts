@@ -404,7 +404,7 @@ export class Avz {
     private getExtensionFullName(extensionName: string): string {
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
         const extensionList = file_utils.readFile(extensionListLocalPath).map(line => line.trimEnd());
-        return extensionList.find(extensionFullName => extensionFullName.endsWith(extensionName)) ?? extensionName;
+        return extensionList.find(extensionFullName => extensionFullName.endsWith("/" + extensionName)) ?? extensionName;
     }
 
 
