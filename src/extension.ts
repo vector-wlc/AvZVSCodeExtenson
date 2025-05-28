@@ -13,38 +13,38 @@ let avz = new Avz();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	let closeTerminal = vscode.window.onDidCloseTerminal(t => {
+	const closeTerminal = vscode.window.onDidCloseTerminal(t => {
 		// Watch for when the server terminal closes.
 		if (t.name === "AvZ") {
 			avz.setTerminalClosed();
 		}
 	});
 
-	let runScriptMaskCmd = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
+	const runScriptMaskCmd = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
 		avz.runScriptMaskCmd();
 	});
 
-	let runScriptInTerminal = vscode.commands.registerCommand('AsmVsZombies.runScriptInTerminal', () => {
+	const runScriptInTerminal = vscode.commands.registerCommand('AsmVsZombies.runScriptInTerminal', () => {
 		avz.runScriptInTerminal();
 	});
 
-	let updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
+	const updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
 		avz.getAvzVersionList();
 	});
 
-	let openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
+	const openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
 		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies");
 	});
 
-	let getPvzExePath = vscode.commands.registerCommand('AsmVsZombies.getPvzExePath', () => {
+	const getPvzExePath = vscode.commands.registerCommand('AsmVsZombies.getPvzExePath', () => {
 		return avz.getPvzExePath();
 	});
 
-	let getPvzProcessId = vscode.commands.registerCommand('AsmVsZombies.getPvzProcessId', () => {
+	const getPvzProcessId = vscode.commands.registerCommand('AsmVsZombies.getPvzProcessId', () => {
 		return avz.getPvzProcessId();
 	});
 
-	let setAvzDir = vscode.commands.registerCommand('AsmVsZombies.setAvzDir', () => {
+	const setAvzDir = vscode.commands.registerCommand('AsmVsZombies.setAvzDir', () => {
 		const options: vscode.OpenDialogOptions = {
 			canSelectFolders: true,
 			canSelectFiles: false,
@@ -59,25 +59,26 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let getAvZExtension = vscode.commands.registerCommand('AsmVsZombies.getAvZExtension', () => {
-		return avz.getExtensionList();
+	const getAvZExtension = vscode.commands.registerCommand('AsmVsZombies.getAvZExtension', () => {
+		avz.getExtensionList();
 	});
 
-
-	let buildAvZ = vscode.commands.registerCommand('AsmVsZombies.buildAvZ', () => {
-		return avz.build();
+	const buildAvZ = vscode.commands.registerCommand('AsmVsZombies.buildAvZ', () => {
+		avz.build();
 	});
 
-	context.subscriptions.push(runScriptMaskCmd);
-	context.subscriptions.push(runScriptInTerminal);
-	context.subscriptions.push(updateAvz);
-	context.subscriptions.push(closeTerminal);
-	context.subscriptions.push(openAvzTutorial);
-	context.subscriptions.push(setAvzDir);
-	context.subscriptions.push(getPvzExePath);
-	context.subscriptions.push(getPvzProcessId);
-	context.subscriptions.push(getAvZExtension);
-	context.subscriptions.push(buildAvZ);
+	context.subscriptions.push(
+		runScriptMaskCmd,
+		runScriptInTerminal,
+		updateAvz,
+		closeTerminal,
+		openAvzTutorial,
+		setAvzDir,
+		getPvzExePath,
+		getPvzProcessId,
+		getAvZExtension,
+		buildAvZ
+	);
 }
 
 // this method is called when your extension is deactivated

@@ -283,8 +283,8 @@ export class Avz {
                 vscode.window.showErrorMessage(vscode.l10n.t("Failed to get number of processors. ({error})", { error: error }));
                 return;
             }
+            const cpuCnt = Number(stdout);
             let lastPercentage = 0;
-            let cpuCnt = Number(stdout);
             let finishCnt = 0;
 
             // 多进程加速编译
@@ -308,7 +308,7 @@ export class Avz {
             // 分配任务
             let totalIdxs: number[][] = Array.from<unknown, number[]>({ length: cpuCnt }, () => []);
             for (let i = 0; i < srcFileCnt; ++i) {
-                totalIdxs[i % cpuCnt].push(i);
+                totalIdxs[i % totalIdxs.length].push(i);
             }
 
             // 执行任务
@@ -395,7 +395,7 @@ export class Avz {
             if (line.includes("__AVZ_VERSION__")) {
                 this.avzVersion = line.split(" ")[2];
                 this.avzVersion = "20" + this.avzVersion.substring(0, 2) + "_" + this.avzVersion.substring(2, 4) + "_" + this.avzVersion.substring(4, 6);
-                break;
+                return;
             }
         }
     }
