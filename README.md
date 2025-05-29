@@ -1,9 +1,3 @@
-<!--
- * @Coding: utf-8
- * @Author: vector-wlc
- * @Date: 2021-08-16 10:34:16
- * @Description: 
--->
 **简体中文** | **[English](./README.en.md)**
 
 # AvZ VSCode Extension

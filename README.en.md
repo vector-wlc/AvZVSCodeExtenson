@@ -6,16 +6,20 @@ A VSCode extension for the PvZ TAS framework - [AsmVsZombies](https://github.com
 
 ## Usage
 
-### View the tutorial
+**View Tutorial**
+
 Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Open Tutorial`.
 
-### Update/rollback the AvZ version
+**Update/Rollback AvZ Version**
+
 Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Update`.
 
-### Set the AvZ installation directory
+**Set AvZ Installation Directory**
+
 Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Set AvZ Dir`.
 
-### Run the script
+**Run Script**
+
 Click the right mouse button and select `AvZ: Run Script` in the menu.
 
 ## License

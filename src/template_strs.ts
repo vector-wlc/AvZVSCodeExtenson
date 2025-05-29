@@ -1,9 +1,19 @@
-/*
- * @Coding: utf-8
- * @Author: vector-wlc
- * @Date: 2021-09-30 11:29:40
- * @Description:
- */
+// Copyright (C) 2021-2025 AsmVsZombies Team
+//
+// This file is part of AvZ VSCode Extension.
+//
+// AvZ VSCode Extension is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 3 of the License, or (at your
+// option) any later version.
+//
+// AvZ VSCode Extension is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
 
 export const generateCCppJson = (avzDir: string, envType: number) => `{
     "configurations": [{
@@ -104,9 +114,9 @@ export const generateMetadataJson = (_: string, envType: number) => `{
 
 
 export function generateCompileCmd(avzDir: string, envType: number): string {
-    let cmd1 = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++" `;
-    let cmd2 = envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result ";
-    let cmd3 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
+    const cmd1 = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++" `;
+    const cmd2 = envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result ";
+    const cmd3 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
     return cmd1 + cmd2 + cmd3;
 }
 

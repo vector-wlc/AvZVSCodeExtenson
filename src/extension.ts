@@ -1,9 +1,19 @@
-/*
- * @Coding: utf-8
- * @Author: vector-wlc
- * @Date: 2021-08-16 10:34:16
- * @Description:
- */
+// Copyright (C) 2021-2025 AsmVsZombies Team
+//
+// This file is part of AvZ VSCode Extension.
+//
+// AvZ VSCode Extension is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 3 of the License, or (at your
+// option) any later version.
+//
+// AvZ VSCode Extension is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
 import { Avz } from './avz';
@@ -20,31 +30,31 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const runScriptMaskCmd = vscode.commands.registerCommand('AsmVsZombies.runScript', () => {
+	const runScriptMaskCmd = vscode.commands.registerCommand("AsmVsZombies.runScript", () => {
 		avz.runScriptMaskCmd();
 	});
 
-	const runScriptInTerminal = vscode.commands.registerCommand('AsmVsZombies.runScriptInTerminal', () => {
+	const runScriptInTerminal = vscode.commands.registerCommand("AsmVsZombies.runScriptInTerminal", () => {
 		avz.runScriptInTerminal();
 	});
 
-	const updateAvz = vscode.commands.registerCommand('AsmVsZombies.updateAvz', () => {
+	const updateAvz = vscode.commands.registerCommand("AsmVsZombies.updateAvz", () => {
 		avz.getAvzVersionList();
 	});
 
-	const openAvzTutorial = vscode.commands.registerCommand('AsmVsZombies.openAvzTutorial', () => {
+	const openAvzTutorial = vscode.commands.registerCommand("AsmVsZombies.openAvzTutorial", () => {
 		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies");
 	});
 
-	const getPvzExePath = vscode.commands.registerCommand('AsmVsZombies.getPvzExePath', () => {
+	const getPvzExePath = vscode.commands.registerCommand("AsmVsZombies.getPvzExePath", () => {
 		return avz.getPvzExePath();
 	});
 
-	const getPvzProcessId = vscode.commands.registerCommand('AsmVsZombies.getPvzProcessId', () => {
+	const getPvzProcessId = vscode.commands.registerCommand("AsmVsZombies.getPvzProcessId", () => {
 		return avz.getPvzProcessId();
 	});
 
-	const setAvzDir = vscode.commands.registerCommand('AsmVsZombies.setAvzDir', () => {
+	const setAvzDir = vscode.commands.registerCommand("AsmVsZombies.setAvzDir", () => {
 		const options: vscode.OpenDialogOptions = {
 			canSelectFolders: true,
 			canSelectFiles: false,
@@ -59,11 +69,11 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	const getAvZExtension = vscode.commands.registerCommand('AsmVsZombies.getAvZExtension', () => {
+	const getAvZExtension = vscode.commands.registerCommand("AsmVsZombies.getAvZExtension", () => {
 		avz.getExtensionList();
 	});
 
-	const buildAvZ = vscode.commands.registerCommand('AsmVsZombies.buildAvZ', () => {
+	const buildAvZ = vscode.commands.registerCommand("AsmVsZombies.buildAvZ", () => {
 		avz.build();
 	});
 
