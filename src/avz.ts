@@ -48,8 +48,10 @@ export class Avz {
     }
 
 
-    // 函数正常运行时, 元组中第一个元素为空字符串, 第二个元素为运行结果
-    // 运行失败时, 第一个元素为失败原因
+    /**
+     * @return - 函数正常运行时, 元组中第一个元素为空字符串, 第二个元素为输出;
+     * - 运行失败时, 第一个元素为失败原因.
+     */
     private static execute(cmd: string): Promise<[err: string, out: string]> {
         return new Promise<[string, string]>(callback => {
             exec(cmd, (error, stdout) => { callback([error?.message ?? "", stdout]); });
@@ -175,7 +177,7 @@ export class Avz {
     }
 
 
-    public setTerminalClosed(): void {
+    public closeTerminal(): void {
         this.avzTerminal = undefined;
     }
 
@@ -195,7 +197,7 @@ export class Avz {
     }
 
 
-    public getAvzVersionList(): void {
+    public updateAvz(): void {
         if (!this.isRunnable()) {
             return;
         }
@@ -215,7 +217,7 @@ export class Avz {
                 return;
             }
             const options: vscode.QuickPickOptions = {
-                title: vscode.l10n.t("Select AvZ version")
+                title: vscode.l10n.t("Select AvZ Version")
             };
             vscode.window.showQuickPick(avzVersionList, options).then(avzVersion => {
                 if (avzVersion === undefined || avzVersion === "") {
@@ -259,8 +261,7 @@ export class Avz {
     }
 
 
-    // 编译 avz 库
-    public build(): void {
+    public buildAvz(): void {
         if (!this.isRunnable()) {
             return;
         }
@@ -353,7 +354,7 @@ export class Avz {
     }
 
 
-    public getExtensionList(): void {
+    public getAvzExtension(): void {
         if (!this.isRunnable()) {
             return;
         }
@@ -377,11 +378,11 @@ export class Avz {
         const extensionListRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/extension_list.txt`;
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
         let extensionFullName = "";
-        fileUtils.downloadToPick(extensionListRemotePath, extensionListLocalPath, vscode.l10n.t("Select extension")).then(extension => {
+        fileUtils.downloadToPick(extensionListRemotePath, extensionListLocalPath, vscode.l10n.t("Select Extension")).then(extension => {
             extensionFullName = extension;
             const versionTxtRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extension}/version.txt`;
             const versionTxtLocalPath = this.tmpDir + "/version.txt";
-            return fileUtils.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, vscode.l10n.t("Select version"));
+            return fileUtils.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, vscode.l10n.t("Select Version"));
         }).then(version => {
             this.installExtension(extensionFullName, version, true);
         });

@@ -2,7 +2,7 @@
 
 # AvZ VSCode Extension
 
-用于 PvZ 键控框架 [AsmVsZombies](https://github.com/vector-wlc/AsmVsZombies) 的 VSCode 扩展。
+用于 植物大战僵尸 键控框架 [AsmVsZombies](https://github.com/vector-wlc/AsmVsZombies) 的 VSCode 扩展。
 
 ## 用法
 

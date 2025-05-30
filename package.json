@@ -53,8 +53,8 @@
                 "title": "%AsmVsZombies.getPvzProcessId.title%"
             },
             {
-                "command": "AsmVsZombies.getAvZExtension",
-                "title": "%AsmVsZombies.getAvZExtension.title%"
+                "command": "AsmVsZombies.getAvzExtension",
+                "title": "%AsmVsZombies.getAvzExtension.title%"
             },
             {
                 "command": "AsmVsZombies.buildAvZ",

@@ -23,12 +23,13 @@ let avz = new Avz();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	const closeTerminal = vscode.window.onDidCloseTerminal(t => {
+	const closeTerminal = vscode.window.onDidCloseTerminal(terminal => {
 		// Watch for when the server terminal closes.
-		if (t.name === "AvZ") {
-			avz.setTerminalClosed();
+		if (terminal.name === "AvZ") {
+			avz.closeTerminal();
 		}
 	});
+
 
 	const runScriptMaskCmd = vscode.commands.registerCommand("AsmVsZombies.runScript", () => {
 		avz.runScriptMaskCmd();
@@ -39,11 +40,11 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const updateAvz = vscode.commands.registerCommand("AsmVsZombies.updateAvz", () => {
-		avz.getAvzVersionList();
+		avz.updateAvz();
 	});
 
 	const openAvzTutorial = vscode.commands.registerCommand("AsmVsZombies.openAvzTutorial", () => {
-		avz.runCmd("start https://gitee.com/vector-wlc/AsmVsZombies");
+		return vscode.env.openExternal(vscode.Uri.parse("https://gitee.com/vector-wlc/AsmVsZombies"));
 	});
 
 	const getPvzExePath = vscode.commands.registerCommand("AsmVsZombies.getPvzExePath", () => {
@@ -69,12 +70,12 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	const getAvZExtension = vscode.commands.registerCommand("AsmVsZombies.getAvZExtension", () => {
-		avz.getExtensionList();
+	const getAvzExtension = vscode.commands.registerCommand("AsmVsZombies.getAvzExtension", () => {
+		avz.getAvzExtension();
 	});
 
-	const buildAvZ = vscode.commands.registerCommand("AsmVsZombies.buildAvZ", () => {
-		avz.build();
+	const buildAvz = vscode.commands.registerCommand("AsmVsZombies.buildAvZ", () => {
+		avz.buildAvz();
 	});
 
 	context.subscriptions.push(
@@ -86,8 +87,8 @@ export function activate(context: vscode.ExtensionContext) {
 		setAvzDir,
 		getPvzExePath,
 		getPvzProcessId,
-		getAvZExtension,
-		buildAvZ
+		getAvzExtension,
+		buildAvz
 	);
 }
 

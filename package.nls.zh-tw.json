@@ -6,7 +6,7 @@
     "AsmVsZombies.setAvzDir.title": "AvZ: 設定 AvZ 目錄",
     "AsmVsZombies.getPvzExePath.title": "AvZ: 獲取 PvZ 執行檔路徑",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: 獲取 PvZ 行程 ID",
-    "AsmVsZombies.getAvZExtension.title": "AvZ: 獲取 AvZ 擴充套件",
+    "AsmVsZombies.getAvzExtension.title": "AvZ: 獲取 AvZ 擴充套件",
     "AsmVsZombies.buildAvZ.title": "AvZ: 構建 AvZ",
 
     "avzConfigure.avzDir.description": "AvZ 安裝路徑。",

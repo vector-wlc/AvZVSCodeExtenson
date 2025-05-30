@@ -6,7 +6,7 @@
     "AsmVsZombies.setAvzDir.title": "AvZ: Set AvZ Dir",
     "AsmVsZombies.getPvzExePath.title": "AvZ: Get PvZ Exe Name",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: Get PvZ Process Id",
-    "AsmVsZombies.getAvZExtension.title": "AvZ: Get AvZ Extension",
+    "AsmVsZombies.getAvzExtension.title": "AvZ: Get AvZ Extension",
     "AsmVsZombies.buildAvZ.title": "AvZ: Build AvZ",
 
     "avzConfigure.avzDir.description": "Path to root directory of AvZ.",
