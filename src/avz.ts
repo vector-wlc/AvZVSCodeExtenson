@@ -350,7 +350,10 @@ export class Avz {
             cancellable: false,
             title: vscode.l10n.t("AvZ library being compiled")
         };
-        vscode.window.withProgress(progressOptions, progressBuild);
+        vscode.window.withProgress(progressOptions, progressBuild).then(
+            () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ built successfully.")); },
+            () => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ.")); }
+        );
     }
 
 
