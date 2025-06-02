@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
 
-import { exec, execSync } from 'child_process';
+import { exec, execSync, ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as vscode from 'vscode';
@@ -48,13 +48,9 @@ export class Avz {
     }
 
 
-    /**
-     * @return - 函数正常运行时, 元组中第一个元素为空字符串, 第二个元素为输出;
-     * - 运行失败时, 第一个元素为失败原因.
-     */
-    private static execute(cmd: string): Promise<[err: string, out: string]> {
-        return new Promise<[string, string]>(callback => {
-            exec(cmd, (error, stdout) => { callback([error?.message ?? "", stdout]); });
+    private static execute(cmd: string): Promise<[error: ExecException | null, stdout: string]> {
+        return new Promise<[ExecException | null, string]>(callback => {
+            exec(cmd, (error, stdout) => { callback([error, stdout]); });
         });
     }
 
@@ -281,10 +277,9 @@ export class Avz {
             const srcFileCnt = srcFiles.length;
             const customOptions = vscode.workspace.getConfiguration().get<string[]>("avzConfigure.compileOptions")!;
             const compileCmd = templateStrs.generateCompileCmd(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
-            const [error, stdout] = await Avz.execute("echo %number_of_processors%");
-            if (error !== "") {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get number of processors. ({error})", { error: error }));
-                return;
+            const [error, stdout] = await Avz.execute("echo %NUMBER_OF_PROCESSORS%");
+            if (error !== null) {
+                throw error;
             }
             const cpuCnt = Number(stdout);
             let lastPercentage = 0;
@@ -296,8 +291,8 @@ export class Avz {
                     const srcFile = srcFiles[idx];
                     const cmd = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await Avz.execute(cmd);
-                    if (err !== "") { // 还不能 return, 否则进度条会卡住
-                        vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err }));
+                    if (err !== null) { // 继续编译
+                        vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
                     const percentage = Math.round(++finishCnt / srcFileCnt * 100);
                     progress.report({
@@ -330,12 +325,7 @@ export class Avz {
                 fs.unlinkSync(libavzPath);
             }
 
-            try {
-                execSync(templateStrs.generatePackCmd(this.avzDir));
-            } catch (err) {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to package AvZ. ({error})", { error: err }));
-                return;
-            }
+            execSync(templateStrs.generatePackCmd(this.avzDir)); // may throw
 
             for (const srcFile of srcFiles) {
                 const path = `${this.avzDir}/src/${srcFile}.o`;
@@ -352,7 +342,7 @@ export class Avz {
         };
         vscode.window.withProgress(progressOptions, progressBuild).then(
             () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ built successfully.")); },
-            () => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ.")); }
+            (reason) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: reason })); }
         );
     }
 

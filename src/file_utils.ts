@@ -61,7 +61,7 @@ export const downloadFile = (url: string, dest: string) => new Promise<string>(c
             callback(dest);
         }).on("error", (err) => {
             fs.unlinkSync(dest);
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err})`);
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err.message})`);
         });
         res.pipe(file);
     });
