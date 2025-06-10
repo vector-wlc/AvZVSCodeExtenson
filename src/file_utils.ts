@@ -50,9 +50,14 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
 
 export const downloadFile = (url: string, dest: string) => new Promise<string>(callback => {
     const file = fs.createWriteStream(dest);
+    const showErrorMessage = (error: string) => {
+        vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
+    };
+
     http.get(url, (res) => {
         if (res.statusCode !== 200) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url));
+            showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
+            res.resume(); // 消费响应数据以清理内存
             return;
         }
 
@@ -60,10 +65,16 @@ export const downloadFile = (url: string, dest: string) => new Promise<string>(c
             file.close();
             callback(dest);
         }).on("error", (err) => {
-            fs.unlinkSync(dest);
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{0}\".", url) + ` (${err.message})`);
+            if (fs.existsSync(dest)) {
+                fs.unlinkSync(dest);
+            }
+            showErrorMessage(err.message);
         });
+
         res.pipe(file);
+
+    }).on("error", (err) => {
+        showErrorMessage(err.message);
     });
 });
 

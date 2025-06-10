@@ -36,10 +36,10 @@ export class Avz {
     private static readonly clangdId = "llvm-vs-code-extensions.vscode-clangd";
 
     private readonly tmpDir: string = os.tmpdir() + "/AsmVsZombies";
-    private avzDir: string = "";
+    private avzDir = "";
     private avzTerminal: vscode.Terminal | undefined = vscode.window.terminals.find(terminal => terminal.name === "AvZ");
-    private avzVersion: string = "";
-    private envType: number = 0;
+    private avzVersion = "";
+    private envType = 0;
     private extensionDownloadList: string[] = [];
 
 
@@ -49,7 +49,7 @@ export class Avz {
 
 
     private static execute(cmd: string): Promise<[error: ExecException | null, stdout: string]> {
-        return new Promise<[ExecException | null, string]>(callback => {
+        return new Promise(callback => {
             exec(cmd, (error, stdout) => { callback([error, stdout]); });
         });
     }

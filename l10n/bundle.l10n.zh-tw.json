@@ -1,5 +1,5 @@
 {
-  "Failed to download file \"{0}\".": "下載檔案 “{0}” 失敗。",
+  "Failed to download file \"{url}\". ({error})": "下載檔案 “{url}” 失敗。（{error}）",
   "Open the AvZ installation directory": "開啟 AvZ 安裝目錄",
   "You must have the folder open to execute the AvZ command!": "您未開啟資料夾，無法執行 AvZ 命令！",
   "AvZ installation directory has been found: ": "已找到 AvZ 安裝目錄：",

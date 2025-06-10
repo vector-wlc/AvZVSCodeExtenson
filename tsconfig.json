@@ -5,8 +5,8 @@
 		"outDir": "out",
 		"lib": [
 			"es6",
-			"es2021.String",
-			"es2022.Array"
+			"es2021.string",
+			"es2022.array"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
