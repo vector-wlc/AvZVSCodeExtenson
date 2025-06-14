@@ -7,7 +7,7 @@
     "AsmVsZombies.getPvzExePath.title": "AvZ: 获取 PvZ 可执行文件路径",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: 获取 PvZ 进程 ID",
     "AsmVsZombies.getAvzExtension.title": "AvZ: 获取 AvZ 插件",
-    "AsmVsZombies.buildAvZ.title": "AvZ: 构建 AvZ",
+    "AsmVsZombies.buildAvz.title": "AvZ: 构建 AvZ",
 
     "avzConfigure.avzDir.description": "AvZ 安装路径。",
     "avzConfigure.pvzExeName.description": "PvZ 可执行文件名称。",

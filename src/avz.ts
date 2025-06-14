@@ -91,7 +91,7 @@ export class Avz {
             return;
         }
         if (avzDir === "") {
-            avzDir = vscode.workspace.getConfiguration().get<string>("avzConfigure.avzDir")!;
+            avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir")!;
         }
         if (avzDir === "") {
             avzDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
@@ -99,7 +99,7 @@ export class Avz {
 
         avzDir = avzDir.replaceAll("\\", "/");
         if (avzDir.endsWith("/")) {
-            avzDir = avzDir.substring(0, avzDir.length - 1);
+            avzDir = avzDir.slice(0, -1);
         }
 
         const subdirs = fs.readdirSync(avzDir).map(subdir => avzDir + "/" + subdir);
@@ -158,7 +158,7 @@ export class Avz {
         try {
             execSync(command);
         } catch (err) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err }));
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: (err as Error).message }));
         }
     }
 
@@ -208,7 +208,7 @@ export class Avz {
         const avzVersionTxtUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
         const avzVersionTxtPath = this.tmpDir + "/version.txt";
         fileUtils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath)
-            .then(avzVersionTxtPath => { // 下载版本列表
+            .then(() => { // 下载版本列表
                 const avzVersionList = fileUtils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith(`env${this.envType}`));
                 if (avzVersionList.length !== 0) {
                     return vscode.window.showQuickPick(avzVersionList, { title: vscode.l10n.t("Select AvZ Version") });
@@ -340,7 +340,7 @@ export class Avz {
         };
         vscode.window.withProgress(progressOptions, progressBuild).then(
             () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ built successfully.")); },
-            (reason) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: reason })); }
+            (reason) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: (reason as Error).message })); }
         );
     }
 

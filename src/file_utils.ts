@@ -48,7 +48,7 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
 }
 
 
-export const downloadFile = (url: string, dest: string) => new Promise<string>(callback => {
+export const downloadFile = (url: string, dest: string) => new Promise<void>(callback => {
     const file = fs.createWriteStream(dest);
     const showErrorMessage = (error: string) => {
         vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
@@ -63,7 +63,7 @@ export const downloadFile = (url: string, dest: string) => new Promise<string>(c
 
         file.on("finish", () => {
             file.close();
-            callback(dest);
+            callback();
         }).on("error", (err) => {
             if (fs.existsSync(dest)) {
                 fs.unlinkSync(dest);
@@ -80,8 +80,8 @@ export const downloadFile = (url: string, dest: string) => new Promise<string>(c
 
 
 export const downloadToPick = (remote: string, local: string, title: string) => new Promise<string>(callback => {
-    downloadFile(remote, local).then(localFile => {
-        const list = readFile(localFile);
+    downloadFile(remote, local).then(() => {
+        const list = readFile(local);
         if (list.length === 0) {
             return;
         }

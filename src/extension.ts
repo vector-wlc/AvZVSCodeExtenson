@@ -74,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
 		avz.getAvzExtension();
 	});
 
-	const buildAvz = vscode.commands.registerCommand("AsmVsZombies.buildAvZ", () => {
+	const buildAvz = vscode.commands.registerCommand("AsmVsZombies.buildAvz", () => {
 		avz.buildAvz();
 	});
 
