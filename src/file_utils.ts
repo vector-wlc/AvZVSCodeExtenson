@@ -44,7 +44,7 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
         }
         fs.unlinkSync(fileName);
     }
-    fs.writeFileSync(fileName, content, "utf8");
+    fs.writeFileSync(fileName, content);
 }
 
 

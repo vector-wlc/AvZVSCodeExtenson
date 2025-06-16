@@ -207,25 +207,22 @@ export class Avz {
         const downloadSource = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
         const avzVersionTxtUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
         const avzVersionTxtPath = this.tmpDir + "/version.txt";
-        fileUtils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath)
-            .then(() => { // 下载版本列表
-                const avzVersionList = fileUtils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith(`env${this.envType}`));
-                if (avzVersionList.length !== 0) {
-                    return vscode.window.showQuickPick(avzVersionList, { title: vscode.l10n.t("Select AvZ Version") });
-                }
-            })
-            .then(avzVersion => {
-                if (avzVersion === undefined || avzVersion === "") {
-                    return;
-                }
-                const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
-                const avzFilePath = this.tmpDir + "/avz.zip";
-                fileUtils.downloadFile(avzVersionUrl, avzFilePath).then(() => { // 下载 AvZ 压缩包
-                    execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
-                    vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
-                    this.recommendClangd();
-                });
-            });
+        fileUtils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(async () => { // 下载版本列表
+            const avzVersionList = fileUtils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith(`env${this.envType}`));
+            if (avzVersionList.length === 0) {
+                return;
+            }
+            const avzVersion = await vscode.window.showQuickPick(avzVersionList, { title: vscode.l10n.t("Select AvZ Version") });
+            if (avzVersion === undefined || avzVersion === "") {
+                return;
+            }
+            const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
+            const avzFilePath = this.tmpDir + "/avz.zip";
+            await fileUtils.downloadFile(avzVersionUrl, avzFilePath); // 下载 AvZ 压缩包
+            execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
+            vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
+            this.recommendClangd();
+        });
     }
 
 
@@ -340,7 +337,7 @@ export class Avz {
         };
         vscode.window.withProgress(progressOptions, progressBuild).then(
             () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ built successfully.")); },
-            (reason) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: (reason as Error).message })); }
+            (reason: Error) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: reason.message })); }
         );
     }
 

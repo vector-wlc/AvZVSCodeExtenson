@@ -32,38 +32,34 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
     // 隐藏内联提示
     "editor.inlayHints.enabled": "offUnlessPressed",
 
-    // 解注这条语句实现保存时格式化
+    // 保存文件时自动格式化代码
     // "editor.formatOnSave": true,
 
-    // AvZ 库的代码格式化方式 (Cpp 插件专用)
+    // AvZ 库的代码风格 (在格式化时使用) (此项为微软 C/C++ 扩展专用)
     // "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: WebKit, AlignTrailingComments: true, Cpp11BracedListStyle: true, BreakBeforeBraces: Attach, PackConstructorInitializers: NextLineOnly, SpaceInEmptyBlock: false }",
 
-    // 解注这条语句关闭 Cpp 插件的报错提示
-    // "C_Cpp.errorSquiggles": "disabled",
+    // 禁用微软 C/C++ 扩展的语法引擎 (使用 clangd 扩展时将此项解除注释可避免冲突)
+    // "C_Cpp.intelliSenseEngine": "disabled",
 
-    // clangd 可执行文件路径
-    // 未安装 clangd vsc 扩展此配置无效
-    "clangd.path": "${avzDir}/MinGW/bin/clangd.exe",
-
-    // clangd avz 配置命令
-    // 未安装 clangd vsc 扩展此配置无效
+    // 编译参数 (仅在 clangd 扩展分析时使用)
     "clangd.fallbackFlags": [
         "-I${avzDir}/inc",
         "-m32",
         "-std=${envType === 1 ? "c++14" : "c++20"}",
         ${envType === 1 ? "" : '"-fexperimental-library"'}
     ],
+    ${envType === 1 ? "" : `
+    // clangd 可执行文件路径 (clangd 扩展专用)
+    "clangd.path": "${avzDir}/MinGW/bin/clangd.exe",
 
-    // lldb-dap avz lldb executable-path 配置
-    // 未安装 lldb-dap 扩展此配置无效
-    "lldb-dap.executable-path": "${avzDir}/MinGW/bin/lldb-vscode.exe"
+    // lldb 可执行文件路径 (LLDB DAP 扩展专用)
+    "lldb-dap.executable-path": "${avzDir}/MinGW/bin/lldb-vscode.exe"`}
 }`;
 
 export const generateLaunchJson = (avzDir: string, _: number) => `{
     "configurations": [
-        // GDB 调试器
-        // 一个基础可用的调试器，调试体验不如 LLDB，但无需安装其他插件
-        // 开箱即用
+        // GDB 调试器 (微软 C/C++ 扩展专用)
+        // 开箱即用, 但调试功能不如 LLDB 强大 (例如无法显示标准库容器中的变量的值)
         {
             "name": "avz attach(gdb)",
             "type": "cppdbg",
@@ -74,9 +70,11 @@ export const generateLaunchJson = (avzDir: string, _: number) => `{
             "miDebuggerPath": "${avzDir}/MinGW/bin/gdb32.exe",
             "preLaunchTask": "avz"
         },
-        // LLDB 调试器
-        // 注意 LLDB 能提供更好的调试体验（能显示 STL 的内存），但是使用此调试器时必须使用 32 位 AvZ2 环境包
-        // 并且需要安装 vscode 插件 LLDB-DAP， 并在插件的 Lldb-dap: Executable-path 设置项上填写 [AvZ环境包的根目录]/MinGW/bin/lldb-vscode.exe
+
+        // LLDB 调试器 (LLDB DAP 扩展专用)
+        // 能提供更好的调试体验, 但是需要满足几个条件才能使用
+        // 使用此调试器时必须使用 32 位 AvZ 环境包, 并且需要安装 VSCode 扩展 "LLDB DAP"
+        // 并且需要在 LLDB DAP 扩展的 "Executable-path" 设置项中填入 [AvZ 环境包的根目录]/MinGW/bin/lldb-vscode.exe
         {
             "name": "avz attach(lldb)",
             "type": "lldb-dap",
@@ -99,7 +97,7 @@ export const generateTasksJson = (_1: string, _2: number) => `{
 }`;
 
 export const generateClangFormat = (_1: string, _2: number) => `
-# AvZ 库的代码格式化方式
+# AvZ 库的代码风格 (在格式化时使用)
 BasedOnStyle: WebKit
 AlignTrailingComments: true
 Cpp11BracedListStyle: true

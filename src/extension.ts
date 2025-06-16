@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 		};
 
 		vscode.window.showOpenDialog(options).then(dir => {
-			if (dir && dir[0]) {
+			if (dir && dir.length > 0) {
 				avz.setAvzDir(dir[0].fsPath);
 			}
 		});
