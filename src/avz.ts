@@ -62,7 +62,7 @@ export class Avz {
     }
 
 
-    private isRunnable(): boolean {
+    private static isRunnable(): boolean {
         if (vscode.workspace.workspaceFolders !== undefined) {
             return true;
         }
@@ -87,7 +87,7 @@ export class Avz {
 
 
     public setAvzDir(avzDir: string = ""): void {
-        if (!this.isRunnable()) {
+        if (!Avz.isRunnable()) {
             return;
         }
         if (avzDir === "") {
@@ -126,7 +126,7 @@ export class Avz {
 
 
     private runScripImp(isMaskCmd: boolean): void {
-        if (!this.isRunnable()) {
+        if (!Avz.isRunnable()) {
             return;
         }
         if (this.avzDir === "") {
@@ -194,7 +194,7 @@ export class Avz {
 
 
     public updateAvz(): void {
-        if (!this.isRunnable()) {
+        if (!Avz.isRunnable()) {
             return;
         }
         if (this.avzDir === "") {
@@ -253,7 +253,7 @@ export class Avz {
 
 
     public buildAvz(): void {
-        if (!this.isRunnable()) {
+        if (!Avz.isRunnable()) {
             return;
         }
         if (this.avzDir === "") {
@@ -281,8 +281,8 @@ export class Avz {
             let finishCnt = 0;
 
             // 多进程加速编译
-            const worker = async (idxs: number[]) => {
-                for (const idx of idxs) {
+            const worker = async (taskList: number[]) => {
+                for (const idx of taskList) {
                     const srcFile = srcFiles[idx];
                     const cmd = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await Avz.execute(cmd);
@@ -299,21 +299,13 @@ export class Avz {
             };
 
             // 分配任务
-            let totalIdxs: number[][] = Array.from<unknown, number[]>({ length: cpuCnt }, () => []);
-            for (let i = 0; i < srcFileCnt; ++i) {
-                totalIdxs[i % totalIdxs.length].push(i);
+            let taskTable: number[][] = Array.from<unknown, number[]>({ length: cpuCnt }, () => []);
+            for (let idx = 0; idx < srcFileCnt; ++idx) {
+                taskTable[idx % cpuCnt].push(idx);
             }
 
-            // 执行任务
-            for (const idxs of totalIdxs) {
-                worker(idxs);
-            }
-
-            // 忙等待上述任务完成
-            const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-            while (finishCnt < srcFileCnt) {
-                await sleep(500);
-            }
+            // 执行任务, 并等待任务完成
+            await Promise.all(taskTable.map(worker));
 
             const libavzPath = this.avzDir + "/bin/libavz.a";
             if (fs.existsSync(libavzPath)) {
@@ -343,7 +335,7 @@ export class Avz {
 
 
     public getAvzExtension(): void {
-        if (!this.isRunnable()) {
+        if (!Avz.isRunnable()) {
             return;
         }
         if (this.avzDir === "") {

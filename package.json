@@ -64,7 +64,7 @@
         "menus": {
             "editor/context": [
                 {
-                    "when": "editorFocus && editorLangId == cpp",
+                    "when": "editorLangId == cpp",
                     "command": "AsmVsZombies.runScriptInTerminal",
                     "group": "navigation"
                 }

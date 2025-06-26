@@ -49,7 +49,7 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
 
 
 export const downloadFile = (url: string, dest: string) => new Promise<void>(callback => {
-    const file = fs.createWriteStream(dest);
+    let file = fs.createWriteStream(dest);
     const showErrorMessage = (error: string) => {
         vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
     };

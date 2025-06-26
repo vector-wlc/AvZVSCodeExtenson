@@ -48,7 +48,7 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
         "-std=${envType === 1 ? "c++14" : "c++20"}",
         ${envType === 1 ? "" : '"-fexperimental-library"'}
     ],
-    ${envType === 1 ? "" : `
+${envType === 1 ? "" : `
     // clangd 可执行文件路径 (clangd 扩展专用)
     "clangd.path": "${avzDir}/MinGW/bin/clangd.exe",
 
