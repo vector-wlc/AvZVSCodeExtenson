@@ -62,7 +62,7 @@ export class Avz {
     }
 
 
-    private static isRunnable(): boolean {
+    private static hasOpenFolder(): boolean {
         if (vscode.workspace.workspaceFolders !== undefined) {
             return true;
         }
@@ -86,15 +86,18 @@ export class Avz {
     }
 
 
-    public setAvzDir(avzDir: string = ""): void {
-        if (!Avz.isRunnable()) {
-            return;
+    /**
+     * @retval true: 成功设置 AvZ 目录
+     * @retval false: 失败
+     */
+    public setAvzDir(avzDir: string = ""): boolean {
+        if (!Avz.hasOpenFolder()) {
+            return false;
         }
         if (avzDir === "") {
-            avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir")!;
-        }
-        if (avzDir === "") {
-            avzDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
+            if ((avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir")!) === "") {
+                avzDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
+            }
         }
 
         avzDir = avzDir.replaceAll("\\", "/");
@@ -110,11 +113,12 @@ export class Avz {
                 this.envType = fs.existsSync(this.avzDir + "/MinGW/bin/libLLVM-15.dll") ? 2 : 1;
                 this.createAvzFiles();
                 vscode.workspace.getConfiguration().update("avzConfigure.avzDir", this.avzDir, false);
-                vscode.window.showInformationMessage(vscode.l10n.t("AvZ installation directory has been found: ") + this.avzDir);
-                return;
+                vscode.window.showInformationMessage(vscode.l10n.t("AvZ {envType} installation directory has been found: {dir}", { envType: this.envType, dir: this.avzDir }));
+                return true;
             }
         }
         vscode.window.showErrorMessage(vscode.l10n.t("The valid AvZ installation directory was not found, try re-running the command \"AvZ: Set AvZ Dir\"."));
+        return false;
     }
 
 
@@ -126,13 +130,10 @@ export class Avz {
 
 
     private runScripImp(isMaskCmd: boolean): void {
-        if (!Avz.isRunnable()) {
+        if (!Avz.hasOpenFolder()) {
             return;
         }
-        if (this.avzDir === "") {
-            this.setAvzDir();
-        }
-        if (this.avzDir === "") {
+        if ((this.avzDir === "") && !this.setAvzDir()) {
             return;
         }
         if (vscode.window.activeTextEditor === undefined) {
@@ -194,13 +195,10 @@ export class Avz {
 
 
     public updateAvz(): void {
-        if (!Avz.isRunnable()) {
+        if (!Avz.hasOpenFolder()) {
             return;
         }
-        if (this.avzDir === "") {
-            this.setAvzDir();
-        }
-        if (this.avzDir === "") {
+        if ((this.avzDir === "") && !this.setAvzDir()) {
             return;
         }
 
@@ -253,13 +251,10 @@ export class Avz {
 
 
     public buildAvz(): void {
-        if (!Avz.isRunnable()) {
+        if (!Avz.hasOpenFolder()) {
             return;
         }
-        if (this.avzDir === "") {
-            this.setAvzDir();
-        }
-        if (this.avzDir === "") {
+        if ((this.avzDir === "") && !this.setAvzDir()) {
             return;
         }
 
@@ -335,13 +330,10 @@ export class Avz {
 
 
     public getAvzExtension(): void {
-        if (!Avz.isRunnable()) {
+        if (!Avz.hasOpenFolder()) {
             return;
         }
-        if (this.avzDir === "") {
-            this.setAvzDir();
-        }
-        if (this.avzDir === "") {
+        if ((this.avzDir === "") && !this.setAvzDir()) {
             return;
         }
 

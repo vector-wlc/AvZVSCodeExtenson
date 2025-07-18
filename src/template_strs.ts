@@ -45,7 +45,7 @@ export const generateSettingsJson = (avzDir: string, envType: number) => `{
     "clangd.fallbackFlags": [
         "-I${avzDir}/inc",
         "-m32",
-        "-std=${envType === 1 ? "c++14" : "c++20"}",
+        "-std=${envType === 1 ? "c++1z" : "c++2b"}",
         ${envType === 1 ? "" : '"-fexperimental-library"'}
     ],
 ${envType === 1 ? "" : `

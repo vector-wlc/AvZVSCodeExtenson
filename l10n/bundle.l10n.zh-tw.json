@@ -2,7 +2,7 @@
   "Failed to download file \"{url}\". ({error})": "下載檔案 “{url}” 失敗。（{error}）",
   "Open the AvZ installation directory": "開啟 AvZ 安裝目錄",
   "You must have the folder open to execute the AvZ command!": "您未開啟資料夾，無法執行 AvZ 命令！",
-  "AvZ installation directory has been found: ": "已找到 AvZ 安裝目錄：",
+  "AvZ {envType} installation directory has been found: {dir}": "已找到 AvZ {envType} 安裝目錄：{dir}",
   "The valid AvZ installation directory was not found, try re-running the command \"AvZ: Set AvZ Dir\".": "未找到有效的 AvZ 安裝目錄，請嘗試重新執行命令 “AvZ: 設定 AvZ 目錄”。",
   "Please open the script file that needs to be run": "請開啟需要執行的指令碼檔案",
   "Failed to run script. ({error})": "執行指令碼失敗。（{error}）",

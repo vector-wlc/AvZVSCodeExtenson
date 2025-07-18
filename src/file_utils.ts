@@ -16,7 +16,7 @@
 // AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
 
 import * as fs from 'fs';
-import * as http from 'https';
+import * as https from 'https';
 import * as vscode from 'vscode';
 
 export function mkDir(dirName: string): boolean {
@@ -54,7 +54,7 @@ export const downloadFile = (url: string, dest: string) => new Promise<void>(cal
         vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
     };
 
-    http.get(url, (res) => {
+    https.get(url, (res) => {
         if (res.statusCode !== 200) {
             showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
             res.resume(); // 消费响应数据以清理内存
