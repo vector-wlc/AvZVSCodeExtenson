@@ -113,7 +113,7 @@ export class Avz {
                 this.envType = fs.existsSync(this.avzDir + "/MinGW/bin/libLLVM-15.dll") ? 2 : 1;
                 this.createAvzFiles();
                 vscode.workspace.getConfiguration().update("avzConfigure.avzDir", this.avzDir, false);
-                vscode.window.showInformationMessage(vscode.l10n.t("AvZ {envType} installation directory has been found: {dir}", { envType: this.envType, dir: this.avzDir }));
+                vscode.window.showInformationMessage(vscode.l10n.t("AvZ installation directory has been found: ") + this.avzDir);
                 return true;
             }
         }
@@ -371,6 +371,18 @@ export class Avz {
                 return;
             }
         }
+    }
+
+
+    public getAvzInfo(): void {
+        if (!Avz.hasOpenFolder()) {
+            return;
+        }
+        if ((this.avzDir === "") && !this.setAvzDir()) {
+            return;
+        }
+        this.getAvzVersion();
+        vscode.window.showInformationMessage(`AvZ ${this.envType} ${this.avzVersion}`);
     }
 
 

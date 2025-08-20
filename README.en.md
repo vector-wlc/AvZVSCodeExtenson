@@ -8,9 +8,13 @@ A VSCode extension for the _Plants vs. Zombies_ TAS framework - [AsmVsZombies](h
 
 - **View Tutorial**: Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Open Tutorial`.
 
+- **Set AvZ Installation Directory**: Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Set AvZ Dir`.
+
+- **Get AvZ Info**：Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Get AvZ Info`.
+
 - **Update/Rollback AvZ Version**: Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Update`.
 
-- **Set AvZ Installation Directory**: Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Set AvZ Dir`.
+- **Get AvZ Extension**：Press `Ctrl + Shift + P` to bring up the command panel and type `AvZ: Get AvZ Extension`.
 
 - **Run Script**: Click the right mouse button and select `AvZ: Run Script` in the menu.
 

@@ -8,6 +8,7 @@
     "AsmVsZombies.getPvzProcessId.title": "AvZ: Get PvZ Process Id",
     "AsmVsZombies.getAvzExtension.title": "AvZ: Get AvZ Extension",
     "AsmVsZombies.buildAvz.title": "AvZ: Build AvZ",
+    "AsmVsZombies.getAvzInfo.title": "AvZ: Get AvZ Info",
 
     "avzConfigure.avzDir.description": "Path to root directory of AvZ.",
     "avzConfigure.pvzExeName.description": "Name of executable of PvZ.",

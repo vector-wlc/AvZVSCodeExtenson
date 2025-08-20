@@ -78,6 +78,10 @@ export function activate(context: vscode.ExtensionContext) {
         avz.buildAvz();
     });
 
+    const getAvzInfo = vscode.commands.registerCommand("AsmVsZombies.getAvzInfo", () => {
+        avz.getAvzInfo();
+    });
+
     context.subscriptions.push(
         runScriptMaskCmd,
         runScriptInTerminal,
@@ -88,7 +92,8 @@ export function activate(context: vscode.ExtensionContext) {
         getPvzExePath,
         getPvzProcessId,
         getAvzExtension,
-        buildAvz
+        buildAvz,
+        getAvzInfo
     );
 }
 
