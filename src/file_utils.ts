@@ -86,7 +86,7 @@ export const downloadToPick = (remote: string, local: string, title: string) => 
             return;
         }
         vscode.window.showQuickPick(list, { title: title }).then(str => {
-            if (str !== undefined && str !== "") {
+            if (str) {
                 callback(str);
             }
         });

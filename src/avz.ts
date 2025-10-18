@@ -211,7 +211,7 @@ export class Avz {
                 return;
             }
             const avzVersion = await vscode.window.showQuickPick(avzVersionList, { title: vscode.l10n.t("Select AvZ Version") });
-            if (avzVersion === undefined || avzVersion === "") {
+            if (!avzVersion) {
                 return;
             }
             const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
@@ -267,11 +267,7 @@ export class Avz {
             const srcFileCnt = srcFiles.length;
             const customOptions = vscode.workspace.getConfiguration().get<string[]>("avzConfigure.compileOptions")!;
             const compileCmd = templateStrs.generateCompileCmd(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
-            const [error, stdout] = await Avz.execute("echo %NUMBER_OF_PROCESSORS%");
-            if (error !== null) {
-                throw error;
-            }
-            const cpuCnt = Number(stdout);
+            const cpuCnt = Number(execSync("echo %NUMBER_OF_PROCESSORS%").toString());
             let lastPercentage = 0;
             let finishCnt = 0;
 
@@ -282,7 +278,7 @@ export class Avz {
                     const cmd = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await Avz.execute(cmd);
                     if (err !== null) { // 继续编译
-                        vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
+                        vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
                     const percentage = Math.round(++finishCnt / srcFileCnt * 100);
                     progress.report({
