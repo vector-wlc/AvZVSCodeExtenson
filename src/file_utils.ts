@@ -55,32 +55,45 @@ export function downloadFile(url: string, dest: string, showProgress: boolean = 
         vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
     };
 
-    const download = () => new Promise<void>(callback => {
+    const download = (progress?: vscode.Progress<{
+        message?: string;
+        increment?: number;
+    }>) => new Promise<void>(callback => {
         https.get(url, (res) => {
             if (res.statusCode !== 200) {
                 showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
-                res.resume(); // 消费响应数据以清理内存
+                res.resume(); // 丢弃数据以减少内存占用
                 return;
             }
-            let file = fs.createWriteStream(dest, { autoClose: true });
-            file.on("finish", () => { callback(); });
-            file.on("error", (err) => { showErrorMessage(err.message); });
+            if (showProgress) {
+                const total = Number(res.headers["content-length"] ?? "0");
+                if (total > 0) {
+                    let received = 0;
+                    res.on("data", (chunk) => {
+                        received += chunk.length;
+                        const percent = (received / total) * 100;
+                        progress!.report({
+                            message: `${Math.round(percent)}%`,
+                            increment: (chunk.length / total) * 100
+                        });
+                    });
+                }
+            }
+            let file = fs.createWriteStream(dest)
+                .on("finish", () => { callback(); })
+                .on("error", (err) => { showErrorMessage(err.message); });
             res.pipe(file);
-        }).on("error", (err) => {
-            showErrorMessage(err.message);
-        });
+        }).on("error", (err) => { showErrorMessage(err.message); });
     });
 
     if (!showProgress) {
         return download();
     }
-
-    const options: vscode.ProgressOptions = {
+    return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: vscode.l10n.t("Downloading…"),
+        title: vscode.l10n.t("Downloading"),
         cancellable: false
-    };
-    return vscode.window.withProgress(options, download);
+    }, download);
 };
 
 

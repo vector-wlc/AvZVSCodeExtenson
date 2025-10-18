@@ -1,12 +1,13 @@
 {
   "Failed to download file \"{url}\". ({error})": "下载文件 “{url}” 失败。（{error}）",
-  "Downloading…": "正在下载…",
+  "Downloading": "正在下载",
   "Open the AvZ installation directory": "打开 AvZ 安装目录",
   "You must have the folder open to execute the AvZ command!": "您未打开文件夹，无法执行 AvZ 命令！",
   "AvZ installation directory has been found: ": "已找到 AvZ 安装目录：",
   "The valid AvZ installation directory was not found, try re-running the command \"AvZ: Set AvZ Dir\".": "未找到有效的 AvZ 安装目录，请尝试重新运行命令 “AvZ: 设置 AvZ 目录”。",
   "Please open the script file that needs to be run": "请打开需要运行的脚本文件",
   "Failed to run script. ({error})": "运行脚本失败。（{error}）",
+  "Script ran successfully.": "脚本成功运行！",
   "It is recommended to install the clangd extension for a better code hinting and formatting experience.": "建议安装 clangd 扩展以获得更好的代码提示和格式化体验。",
   "Install": "前往安装",
   "Select AvZ Version": "请选择 AvZ 版本",
@@ -22,5 +23,6 @@
   "Select Version": "请选择版本",
   "You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.": "您已安装过插件 “{0}”，因此不再进行重复安装。如果遇到版本兼容性问题，请手动安装该插件的其他版本；如果实在解决不了问题，请联系插件作者。",
   "Extension \"{0}\" installed successfully.": "插件 “{0}” 安装成功！",
-  "The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!": "您下载的插件 “{0}” 依赖的 AvZ 版本为 {1}, 但是现在的 AvZ 版本为 {2}, 这可能带来不兼容问题！"
+  "The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!": "您下载的插件 “{0}” 依赖的 AvZ 版本为 {1}, 但是现在的 AvZ 版本为 {2}, 这可能带来不兼容问题！",
+  "Extension \"{0}\" not found.": "未找到扩展 “{0}”。"
 }

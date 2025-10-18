@@ -97,7 +97,8 @@ export class Avz {
             return false;
         }
         if (avzDir === "") {
-            if ((avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir")!) === "") {
+            avzDir = vscode.workspace.getConfiguration().get("avzConfigure.avzDir")!;
+            if (avzDir === "") {
                 avzDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
             }
         }
@@ -158,11 +159,13 @@ export class Avz {
             this.runCmd(command);
             return;
         }
-        try {
-            execSync(command);
-        } catch (err) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: (err as Error).message }));
-        }
+        Avz.execute(command).then(([err]) => {
+            if (err !== null) {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
+            } else {
+                vscode.window.showInformationMessage(vscode.l10n.t("Script ran successfully."));
+            }
+        });
     }
 
 
@@ -282,7 +285,7 @@ export class Avz {
                     if (err !== null) { // 继续编译
                         vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
-                    const percentage = Math.round(++finishCnt / srcFileCnt * 100);
+                    const percentage = Math.round((++finishCnt / srcFileCnt) * 100);
                     progress.report({
                         message: `${percentage}%`,
                         increment: percentage - lastPercentage
@@ -365,7 +368,7 @@ export class Avz {
         for (const line of lines) {
             if (line.includes("__AVZ_VERSION__")) {
                 this.avzVersion = line.split(" ")[2];
-                this.avzVersion = "20" + this.avzVersion.substring(0, 2) + "_" + this.avzVersion.substring(2, 4) + "_" + this.avzVersion.substring(4, 6);
+                this.avzVersion = `20${this.avzVersion.substring(0, 2)}_${this.avzVersion.substring(2, 4)}_${this.avzVersion.substring(4, 6)}`;
                 return;
             }
         }
@@ -384,10 +387,10 @@ export class Avz {
     }
 
 
-    private getExtensionFullName(extensionName: string): string {
+    private getExtensionFullName(extensionName: string): string | undefined {
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
         const extensionList = fileUtils.readFile(extensionListLocalPath).map(line => line.trimEnd());
-        return extensionList.find(extensionFullName => extensionFullName.endsWith("/" + extensionName)) ?? extensionName;
+        return extensionList.find(extensionFullName => extensionFullName.endsWith("/" + extensionName));
     }
 
 
@@ -409,7 +412,7 @@ export class Avz {
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionLocalFile}" -aoa -o"${this.avzDir}/inc"`);
         vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" installed successfully.", extensionName));
         // 读取插件的依赖列表
-        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trimEnd()).filter(line => line !== "");
+        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trimEnd());
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.getAvzVersion();
@@ -419,7 +422,12 @@ export class Avz {
                 }
             } else if (lineNum > 1) {
                 const [name, version] = line.split(" ");
-                await this.installExtension(this.getExtensionFullName(name), version);
+                const fullName = this.getExtensionFullName(name);
+                if (fullName !== undefined) {
+                    await this.installExtension(fullName, version);
+                } else {
+                    vscode.window.showErrorMessage(vscode.l10n.t("Extension \"{0}\" not found.", name));
+                }
             }
         }
     }
