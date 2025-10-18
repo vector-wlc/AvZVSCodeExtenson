@@ -5,9 +5,11 @@ out/test/**
 src/**
 .gitignore
 .yarnrc
-README.en.md
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
+
+l10n/bundle.l10n.json
+README.en.md

@@ -216,7 +216,7 @@ export class Avz {
             }
             const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
             const avzFilePath = this.tmpDir + "/avz.zip";
-            await fileUtils.downloadFile(avzVersionUrl, avzFilePath); // 下载 AvZ 压缩包
+            await fileUtils.downloadFile(avzVersionUrl, avzFilePath, true); // 下载 AvZ 压缩包
             execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
             vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
             this.recommendClangd();
@@ -403,7 +403,7 @@ export class Avz {
         const downloadSource = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
         const extensionRemoteFile = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionLocalFile = this.tmpDir + "/extension.zip";
-        await fileUtils.downloadFile(extensionRemoteFile, extensionLocalFile);
+        await fileUtils.downloadFile(extensionRemoteFile, extensionLocalFile, true);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionLocalFile}" -aoa -o"${this.avzDir}/inc"`);
         vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" installed successfully.", extensionName));
         // 读取插件的依赖列表

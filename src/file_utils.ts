@@ -48,35 +48,38 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
 }
 
 
-export const downloadFile = (url: string, dest: string) => new Promise<void>(callback => {
-    let file = fs.createWriteStream(dest);
+export function downloadFile(url: string, dest: string, showProgress: boolean = false): Thenable<void> {
     const showErrorMessage = (error: string) => {
         vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
     };
 
-    https.get(url, (res) => {
-        if (res.statusCode !== 200) {
-            showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
-            res.resume(); // 消费响应数据以清理内存
-            return;
-        }
-
-        file.on("finish", () => {
-            file.close();
-            callback();
-        }).on("error", (err) => {
-            if (fs.existsSync(dest)) {
-                fs.unlinkSync(dest);
+    const download = () => new Promise<void>(callback => {
+        https.get(url, (res) => {
+            if (res.statusCode !== 200) {
+                showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
+                res.resume(); // 消费响应数据以清理内存
+                return;
             }
+            let file = fs.createWriteStream(dest, { autoClose: true });
+            file.on("finish", () => { callback(); });
+            file.on("error", (err) => { showErrorMessage(err.message); });
+            res.pipe(file);
+        }).on("error", (err) => {
             showErrorMessage(err.message);
         });
-
-        res.pipe(file);
-
-    }).on("error", (err) => {
-        showErrorMessage(err.message);
     });
-});
+
+    if (!showProgress) {
+        return download();
+    }
+
+    const options: vscode.ProgressOptions = {
+        location: vscode.ProgressLocation.Notification,
+        title: vscode.l10n.t("Downloading…"),
+        cancellable: false
+    };
+    return vscode.window.withProgress(options, download);
+};
 
 
 export const downloadToPick = (remote: string, local: string, title: string) => new Promise<string>(callback => {

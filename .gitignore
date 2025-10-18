@@ -3,3 +3,5 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+
+l10n/bundle.l10n.json
