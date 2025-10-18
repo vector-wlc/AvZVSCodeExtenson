@@ -19,6 +19,7 @@
 
 import * as fs from 'fs';
 import * as https from 'https';
+import { pipeline } from 'stream';
 import * as vscode from 'vscode';
 
 export function mkDir(dirName: string): boolean {
@@ -79,10 +80,15 @@ export function downloadFile(url: string, dest: string, showProgress: boolean = 
                     });
                 }
             }
-            let file = fs.createWriteStream(dest)
-                .on("finish", () => { callback(); })
-                .on("error", (err) => { showErrorMessage(err.message); });
-            res.pipe(file);
+            let file = fs.createWriteStream(dest).on("finish", () => { callback(); });
+            pipeline(res, file, (err) => {
+                if (err !== null) {
+                    showErrorMessage(err.message);
+                    if (fs.existsSync(dest)) {
+                        fs.unlinkSync(dest);
+                    }
+                }
+            });
         }).on("error", (err) => { showErrorMessage(err.message); });
     });
 
