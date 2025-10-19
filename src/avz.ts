@@ -24,16 +24,22 @@ import * as vscode from 'vscode';
 import * as fileUtils from './file_utils';
 import * as templateStrs from './template_strs';
 
+const enum RepoType {
+    gitHub = "GitHub",
+    gitLab = "GitLab",
+    gitee = "Gitee"
+}
+
 export class Avz {
-    private static readonly avzRepositoryUrl: ReadonlyMap<string, string> = new Map([
-        ["GitHub", "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
-        ["GitLab", "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
-        ["Gitee", "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
+    private static readonly avzRepoUrl: ReadonlyMap<string, string> = new Map([
+        [RepoType.gitHub, "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
+        [RepoType.gitLab, "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
+        [RepoType.gitee, "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
     ]);
-    private static readonly extensionRepositoryUrl: ReadonlyMap<string, string> = new Map([
-        ["GitHub", "https://github.com/qrmd0/AvZLib/raw/main"],
-        ["GitLab", "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
-        ["Gitee", "https://gitee.com/qrmd/AvZLib/raw/main"],
+    private static readonly extensionRepoUrl: ReadonlyMap<string, string> = new Map([
+        [RepoType.gitHub, "https://github.com/qrmd0/AvZLib/raw/main"],
+        [RepoType.gitLab, "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
+        [RepoType.gitee, "https://gitee.com/qrmd/AvZLib/raw/main"],
     ]);
     private static readonly clangdId = "llvm-vs-code-extensions.vscode-clangd";
 
@@ -208,7 +214,7 @@ export class Avz {
         }
 
         const downloadSource = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
-        const avzVersionTxtUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/version.txt`;
+        const avzVersionTxtUrl = `${Avz.avzRepoUrl.get(downloadSource)}/release/version.txt`;
         const avzVersionTxtPath = this.tmpDir + "/version.txt";
         fileUtils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(async () => { // 下载版本列表
             const avzVersionList = fileUtils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith(`env${this.envType}`));
@@ -219,7 +225,7 @@ export class Avz {
             if (!avzVersion) {
                 return;
             }
-            const avzVersionUrl = `${Avz.avzRepositoryUrl.get(downloadSource)}/release/${avzVersion}`;
+            const avzVersionUrl = `${Avz.avzRepoUrl.get(downloadSource)}/release/${avzVersion}`;
             const avzFilePath = this.tmpDir + "/avz.zip";
             await fileUtils.downloadFile(avzVersionUrl, avzFilePath, true); // 下载 AvZ 压缩包
             execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
@@ -270,10 +276,13 @@ export class Avz {
         const progressBuild = async (progress: Progress) => {
             const srcFiles = fs.readdirSync(this.avzDir + "/src").filter(fileName => fileName.endsWith(".cpp"));
             const srcFileCnt = srcFiles.length;
+            if (srcFileCnt === 0) {
+                throw new Error("Source files not found");
+            }
             const customOptions = vscode.workspace.getConfiguration().get<string[]>("avzConfigure.compileOptions")!;
             const compileCmd = templateStrs.generateCompileCmd(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
             const cpuCnt = Number(execSync("echo %NUMBER_OF_PROCESSORS%").toString());
-            let lastPercentage = 0;
+            const increment = (1 / srcFileCnt) * 100;
             let finishCnt = 0;
 
             // 多进程加速编译
@@ -285,12 +294,11 @@ export class Avz {
                     if (err !== null) { // 继续编译
                         vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
-                    const percentage = Math.round((++finishCnt / srcFileCnt) * 100);
+                    const percent = Math.round((++finishCnt / srcFileCnt) * 100);
                     progress.report({
-                        message: `${percentage}%`,
-                        increment: percentage - lastPercentage
+                        message: `${percent}%`,
+                        increment: increment
                     });
-                    lastPercentage = percentage;
                 }
             };
 
@@ -348,10 +356,10 @@ export class Avz {
         }
 
         const downloadSource = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
-        const extensionListRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/extension_list.txt`;
+        const extensionListRemotePath = `${Avz.extensionRepoUrl.get(downloadSource)}/extension_list.txt`;
         const extensionListLocalPath = this.tmpDir + "/extension_list.txt";
         fileUtils.downloadToPick(extensionListRemotePath, extensionListLocalPath, vscode.l10n.t("Select Extension")).then(extensionFullName => {
-            const versionTxtRemotePath = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extensionFullName}/version.txt`;
+            const versionTxtRemotePath = `${Avz.extensionRepoUrl.get(downloadSource)}/${extensionFullName}/version.txt`;
             const versionTxtLocalPath = this.tmpDir + "/version.txt";
             fileUtils.downloadToPick(versionTxtRemotePath, versionTxtLocalPath, vscode.l10n.t("Select Version")).then(extensionVersion => {
                 this.installExtension(extensionFullName, extensionVersion, true);
@@ -406,7 +414,7 @@ export class Avz {
         }
 
         const downloadSource = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
-        const extensionRemoteFile = `${Avz.extensionRepositoryUrl.get(downloadSource)}/${extensionFullName}/release/${extensionVersion}.zip`;
+        const extensionRemoteFile = `${Avz.extensionRepoUrl.get(downloadSource)}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionLocalFile = this.tmpDir + "/extension.zip";
         await fileUtils.downloadFile(extensionRemoteFile, extensionLocalFile, true);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionLocalFile}" -aoa -o"${this.avzDir}/inc"`);

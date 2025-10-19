@@ -19,7 +19,7 @@
 
 import * as fs from 'fs';
 import * as https from 'https';
-import { pipeline } from 'stream';
+import * as stream from 'stream';
 import * as vscode from 'vscode';
 
 export function mkDir(dirName: string): boolean {
@@ -81,7 +81,7 @@ export function downloadFile(url: string, dest: string, showProgress: boolean = 
                 }
             }
             let file = fs.createWriteStream(dest).on("finish", () => { callback(); });
-            pipeline(res, file, (err) => {
+            stream.pipeline(res, file, (err) => {
                 if (err !== null) {
                     showErrorMessage(err.message);
                     if (fs.existsSync(dest)) {

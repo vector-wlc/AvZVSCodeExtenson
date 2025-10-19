@@ -13,6 +13,6 @@
     "avzConfigure.avzDir.description": "AvZ 安裝路徑。",
     "avzConfigure.pvzExeName.description": "PvZ 執行檔名稱。",
     "avzConfigure.compileOptions.description": "AvZ 編譯指令碼時的額外編譯選項。",
-    "avzConfigure.avzRunScriptCmd.description": "AvZ 指令碼執行命令。\n在生成執行命令時，“__FILE_NAME__” 會被指令碼路徑替換，“__AVZ_DIR__” 會被 AvZ 環境包根目錄替換，“__COMPILER_CMD__” 會被 [AvZ 指令碼編譯命令] 替換。",
+    "avzConfigure.avzRunScriptCmd.description": "AvZ 指令碼執行命令。\n在生成執行命令時，「__FILE_NAME__」會被指令碼路徑替換，「__AVZ_DIR__」會被 AvZ 環境包根目錄替換，「__COMPILER_CMD__」會被 [AvZ 指令碼編譯命令] 替換。",
     "avzConfigure.downloadSource.description": "AvZ 和 AvZ 擴充套件的下載源。"
 }
