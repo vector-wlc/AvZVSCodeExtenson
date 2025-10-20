@@ -25,21 +25,21 @@ import * as fileUtils from './file_utils';
 import * as templateStrs from './template_strs';
 
 const enum RepoType {
-    gitHub = "GitHub",
-    gitLab = "GitLab",
-    gitee = "Gitee"
+    GITHUB = "GitHub",
+    GITLAB = "GitLab",
+    GITEE = "Gitee"
 }
 
 export class Avz {
     private static readonly avzRepoUrl: ReadonlyMap<string, string> = new Map([
-        [RepoType.gitHub, "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
-        [RepoType.gitLab, "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
-        [RepoType.gitee, "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
+        [RepoType.GITHUB, "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
+        [RepoType.GITLAB, "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
+        [RepoType.GITEE, "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
     ]);
     private static readonly extensionRepoUrl: ReadonlyMap<string, string> = new Map([
-        [RepoType.gitHub, "https://github.com/qrmd0/AvZLib/raw/main"],
-        [RepoType.gitLab, "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
-        [RepoType.gitee, "https://gitee.com/qrmd/AvZLib/raw/main"],
+        [RepoType.GITHUB, "https://github.com/qrmd0/AvZLib/raw/main"],
+        [RepoType.GITLAB, "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
+        [RepoType.GITEE, "https://gitee.com/qrmd/AvZLib/raw/main"],
     ]);
     private static readonly clangdId = "llvm-vs-code-extensions.vscode-clangd";
 
@@ -131,6 +131,11 @@ export class Avz {
     }
 
 
+    public closeTerminal(): void {
+        this.avzTerminal = undefined;
+    }
+
+
     public runCmd(cmd: string): void {
         this.avzTerminal ??= vscode.window.createTerminal("AvZ", "cmd");
         this.avzTerminal.sendText(cmd);
@@ -182,11 +187,6 @@ export class Avz {
 
     public runScriptMaskCmd(): void {
         this.runScripImp(true);
-    }
-
-
-    public closeTerminal(): void {
-        this.avzTerminal = undefined;
     }
 
 
