@@ -17,7 +17,7 @@
   "Process ID of PvZ has been found: ": "已找到 PvZ 的行程 ID：",
   "Failed to compile file \"{file}\". ({error})": "编译文件「{file}」失败！（{error}）",
   "AvZ library being compiled": "正在編譯 AvZ 庫",
-  "AvZ built successfully.": "AvZ 構建成功。",
+  "AvZ built successfully.": "AvZ 構建成功！",
   "Failed to build AvZ. ({error})": "AvZ 構建失敗！（{error}）",
   "Select Extension": "請選擇擴充套件",
   "Select Version": "請選擇版本",

@@ -281,7 +281,7 @@ export class Avz {
             }
             const customOptions = vscode.workspace.getConfiguration().get<string[]>("avzConfigure.compileOptions")!;
             const compileCmd = templateStrs.generateCompileCmd(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
-            const cpuCnt = Number(execSync("echo %NUMBER_OF_PROCESSORS%").toString());
+            const cpuCnt = os.availableParallelism();
             const increment = (1 / srcFileCnt) * 100;
             let finishCnt = 0;
 
