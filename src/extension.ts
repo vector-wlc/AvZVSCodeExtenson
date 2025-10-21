@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const updateAvz = vscode.commands.registerCommand("AsmVsZombies.updateAvz", () => {
-        avz.updateAvz();
+        return avz.updateAvz();
     });
 
     const openAvzTutorial = vscode.commands.registerCommand("AsmVsZombies.openAvzTutorial", () => {
@@ -73,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const getAvzExtension = vscode.commands.registerCommand("AsmVsZombies.getAvzExtension", () => {
-        avz.getAvzExtension();
+        return avz.getAvzExtension();
     });
 
     const buildAvz = vscode.commands.registerCommand("AsmVsZombies.buildAvz", () => {

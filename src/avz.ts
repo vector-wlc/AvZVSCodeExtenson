@@ -200,7 +200,7 @@ export class Avz {
     }
 
 
-    public updateAvz(): void {
+    public async updateAvz(): Promise<void> {
         if (!Avz.hasOpenFolder()) {
             return;
         }
@@ -209,24 +209,20 @@ export class Avz {
         }
 
         const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
+
+        // 下载版本列表
         const avzVersionTxtUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
         const avzVersionTxtPath = this.tmpDir + "/version.txt";
-        fileUtils.downloadFile(avzVersionTxtUrl, avzVersionTxtPath).then(async () => { // 下载版本列表
-            const avzVersionList = fileUtils.readFile(avzVersionTxtPath).filter(ver => ver.startsWith(`env${this.envType}`));
-            if (avzVersionList.length === 0) {
-                return;
-            }
-            const avzVersion = await vscode.window.showQuickPick(avzVersionList, { title: vscode.l10n.t("Select AvZ Version") });
-            if (!avzVersion) {
-                return;
-            }
-            const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
-            const avzFilePath = this.tmpDir + "/avz.zip";
-            await fileUtils.downloadFile(avzFileUrl, avzFilePath, true); // 下载 AvZ 压缩包
-            execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
-            vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
-            this.recommendClangd();
-        });
+        const avzVersion = await fileUtils.downloadToPick(avzVersionTxtUrl, avzVersionTxtPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
+
+        // 下载 AvZ 压缩包
+        const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
+        const avzFilePath = this.tmpDir + "/avz.zip";
+        await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
+
+        execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
+        vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
+        this.recommendClangd();
     }
 
 
@@ -239,6 +235,7 @@ export class Avz {
         }
 
         const progressBuild = async (progress: vscode.Progress<{ message?: string; increment?: number; }>) => {
+            // encoding 默认为 "utf8", 但仍显式给出, 以匹配返回 string[] 的重载
             const srcFiles = fs.readdirSync(this.avzDir + "/src", { encoding: "utf8", recursive: true }).filter(entryName => entryName.endsWith(".cpp"));
             const srcFileCnt = srcFiles.length;
             if (srcFileCnt === 0) {
@@ -369,7 +366,7 @@ export class Avz {
     }
 
 
-    public getAvzExtension(): void {
+    public async getAvzExtension(): Promise<void> {
         if (!Avz.hasOpenFolder()) {
             return;
         }
@@ -377,17 +374,17 @@ export class Avz {
             return;
         }
         this.refreshExtensionList();
-
         const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
+
         const extensionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/extension_list.txt`;
         const extensionListPath = this.tmpDir + "/extension_list.txt";
-        fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension")).then(fullName => {
-            const versionTxtUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
-            const versionTxtPath = this.tmpDir + "/version.txt";
-            fileUtils.downloadToPick(versionTxtUrl, versionTxtPath, vscode.l10n.t("Select Version")).then(version => {
-                this.installExtension(fullName, version, true);
-            });
-        });
+        const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension"));
+
+        const versionTxtUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
+        const versionTxtPath = this.tmpDir + "/version.txt";
+        const version = await fileUtils.downloadToPick(versionTxtUrl, versionTxtPath, vscode.l10n.t("Select Version"));
+
+        await this.installExtension(fullName, version, true);
     }
 
 
@@ -417,7 +414,7 @@ export class Avz {
         }
 
         // 读取插件的依赖列表
-        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trimEnd());
+        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trim());
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.refreshAvzVersion();

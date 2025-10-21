@@ -30,24 +30,12 @@ export function mkDir(dirName: string): boolean {
     return fs.existsSync(dirName);
 }
 
+export const readFile = (path: string): string[] => fs.readFileSync(path, "utf8").trimEnd().replaceAll("\r", "").split("\n");
 
-export function readFile(fileName: string): string[] {
-    let lines = fs.readFileSync(fileName, "utf8").replaceAll("\r", "").split("\n");
-    while (lines.at(-1) === "") {
-        lines.pop();
+export function writeFile(path: string, str: string, canOverwrite: boolean = true): void {
+    if (!fs.existsSync(path) || canOverwrite) {
+        fs.writeFileSync(path, str);
     }
-    return lines;
-}
-
-
-export function writeFile(fileName: string, content: string, isUnlink: boolean = true): void {
-    if (fs.existsSync(fileName)) {
-        if (!isUnlink) {
-            return;
-        }
-        fs.unlinkSync(fileName);
-    }
-    fs.writeFileSync(fileName, content);
 }
 
 
@@ -103,15 +91,20 @@ export function downloadFile(srcUrl: string, destPath: string, showProgress: boo
 };
 
 
-export const downloadToPick = (srcUrl: string, destPath: string, title: string) => new Promise<string>(callback => {
+export const downloadToPick = (
+    srcUrl: string,
+    destPath: string,
+    title: string,
+    pred?: (selection: string) => boolean
+) => new Promise<string>(callback => {
     downloadFile(srcUrl, destPath).then(() => {
-        const list = readFile(destPath);
+        const list = readFile(destPath).filter(pred ?? (() => true));
         if (list.length === 0) {
             return;
         }
-        vscode.window.showQuickPick(list, { title: title }).then(option => {
-            if (option) {
-                callback(option);
+        vscode.window.showQuickPick(list, { title: title }).then(selection => {
+            if (selection) {
+                callback(selection);
             }
         });
     });
