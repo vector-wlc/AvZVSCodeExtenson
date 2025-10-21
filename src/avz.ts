@@ -48,7 +48,7 @@ export class Avz {
     private avzTerminal: vscode.Terminal | undefined = vscode.window.terminals.find(terminal => terminal.name === "AvZ");
     private avzVersion = "";
     private envType = 0;
-    private extensionInstalledList: string[] = [];
+    private extensionInstalledList = new Set<string>();
 
 
     constructor() {
@@ -357,13 +357,13 @@ export class Avz {
 
 
     private refreshExtensionList(): void {
-        if (this.extensionInstalledList.length > 0) {
+        if (this.extensionInstalledList.size > 0) {
             return;
         }
         const entrys = fs.readdirSync(this.avzDir + "/inc", { withFileTypes: true });
         for (const entry of entrys) { // 读取已经安装的插件列表
             if (entry.isDirectory()) {
-                this.extensionInstalledList.push(entry.name);
+                this.extensionInstalledList.add(entry.name);
             }
         }
     }
@@ -400,7 +400,7 @@ export class Avz {
 
     private async installExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false): Promise<void> {
         const extensionName = extensionFullName.split("/")[1];
-        const hasInstalled = this.extensionInstalledList.includes(extensionName);
+        const hasInstalled = this.extensionInstalledList.has(extensionName);
         if (hasInstalled && !isForceInstall) {
             vscode.window.showWarningMessage(vscode.l10n.t("You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.", extensionName));
             return;
@@ -413,7 +413,7 @@ export class Avz {
         vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" installed successfully.", extensionName));
 
         if (!hasInstalled) {
-            this.extensionInstalledList.push(extensionName);
+            this.extensionInstalledList.add(extensionName);
         }
 
         // 读取插件的依赖列表
