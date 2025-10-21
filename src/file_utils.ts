@@ -19,7 +19,7 @@
 
 import * as fs from 'fs';
 import * as https from 'https';
-import * as stream from 'stream';
+import { pipeline } from 'stream';
 import * as vscode from 'vscode';
 
 export function mkDir(dirName: string): boolean {
@@ -51,16 +51,16 @@ export function writeFile(fileName: string, content: string, isUnlink: boolean =
 }
 
 
-export function downloadFile(url: string, dest: string, showProgress: boolean = false): Thenable<void> {
+export function downloadFile(srcUrl: string, destPath: string, showProgress: boolean = false): Thenable<void> {
     const showErrorMessage = (error: string) => {
-        vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: url, error: error }));
+        vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: srcUrl, error: error }));
     };
 
     const download = (progress?: vscode.Progress<{
         message?: string;
         increment?: number;
     }>) => new Promise<void>(callback => {
-        https.get(url, (res) => {
+        https.get(srcUrl, (res) => {
             if (res.statusCode !== 200) {
                 showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
                 res.resume(); // 丢弃数据以减少内存占用
@@ -80,12 +80,12 @@ export function downloadFile(url: string, dest: string, showProgress: boolean = 
                     });
                 }
             }
-            let file = fs.createWriteStream(dest).on("finish", () => { callback(); });
-            stream.pipeline(res, file, (err) => {
+            let file = fs.createWriteStream(destPath).on("finish", () => { callback(); });
+            pipeline(res, file, (err) => {
                 if (err !== null) {
                     showErrorMessage(err.message);
-                    if (fs.existsSync(dest)) {
-                        fs.unlinkSync(dest);
+                    if (fs.existsSync(destPath)) {
+                        fs.unlinkSync(destPath);
                     }
                 }
             });
@@ -103,15 +103,15 @@ export function downloadFile(url: string, dest: string, showProgress: boolean = 
 };
 
 
-export const downloadToPick = (remote: string, local: string, title: string) => new Promise<string>(callback => {
-    downloadFile(remote, local).then(() => {
-        const list = readFile(local);
+export const downloadToPick = (srcUrl: string, destPath: string, title: string) => new Promise<string>(callback => {
+    downloadFile(srcUrl, destPath).then(() => {
+        const list = readFile(destPath);
         if (list.length === 0) {
             return;
         }
-        vscode.window.showQuickPick(list, { title: title }).then(str => {
-            if (str) {
-                callback(str);
+        vscode.window.showQuickPick(list, { title: title }).then(option => {
+            if (option) {
+                callback(option);
             }
         });
     });
