@@ -135,7 +135,7 @@ export class Avz {
     }
 
 
-    private runScripImp(isMaskCmd: boolean): void {
+    private async runScripImp(isMaskCmd: boolean): Promise<void> {
         if (!Avz.hasOpenFolder()) {
             return;
         }
@@ -144,6 +144,10 @@ export class Avz {
         }
         if (vscode.window.activeTextEditor === undefined) {
             vscode.window.showErrorMessage(vscode.l10n.t("Please open the script file that needs to be run"));
+            return;
+        }
+        if (!await vscode.window.activeTextEditor.document.save()) {
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to save the script file."));
             return;
         }
 
@@ -155,22 +159,18 @@ export class Avz {
             .replaceAll("__AVZ_DIR__", this.avzDir)
             .replaceAll("__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
 
-        vscode.window.activeTextEditor.document.save();
-        try {
-            execSync("taskkill /f /im gdb32.exe");
-        } catch { }
+        await Avz.execute("taskkill /f /im gdb32.exe"); // 杀死之前运行的调试器进程
 
         if (!isMaskCmd) {
             this.runCmd(command);
             return;
         }
-        Avz.execute(command).then(([err]) => {
-            if (err !== null) {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
-            } else {
-                vscode.window.showInformationMessage(vscode.l10n.t("Script ran successfully."));
-            }
-        });
+        const [err] = await Avz.execute(command);
+        if (err !== null) {
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
+        } else {
+            vscode.window.showInformationMessage(vscode.l10n.t("Script was injected successfully."));
+        }
     }
 
 
@@ -249,7 +249,7 @@ export class Avz {
             title: vscode.l10n.t("AvZ library being compiled")
         };
         vscode.window.withProgress(progressOptions, progressBuild).then(
-            () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ built successfully.")); },
+            () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ was built successfully.")); },
             (reason: Error) => { vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: reason.message })); }
         );
     }
@@ -317,7 +317,7 @@ export class Avz {
         await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
 
         execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
-        vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
+        vscode.window.showInformationMessage(vscode.l10n.t("AvZ was updated successfully."));
         this.recommendClangd();
     }
 
@@ -403,7 +403,7 @@ export class Avz {
         const extensionPath = this.tmpDir + "/extension.zip";
         await fileUtils.downloadFile(extensionUrl, extensionPath, true);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionPath}" -aoa -o"${this.avzDir}/inc"`);
-        vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" installed successfully.", extensionName));
+        vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" was installed successfully.", extensionName));
 
         if (!hasInstalled) {
             this.extensionInstalledList.add(extensionName);
