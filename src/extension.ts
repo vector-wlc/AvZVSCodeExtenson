@@ -42,11 +42,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const updateAvz = vscode.commands.registerCommand("AsmVsZombies.updateAvz", () => {
-        return avz.updateAvz();
+        avz.updateAvz();
     });
 
     const openAvzTutorial = vscode.commands.registerCommand("AsmVsZombies.openAvzTutorial", () => {
-        return vscode.env.openExternal(vscode.Uri.parse("https://gitee.com/vector-wlc/AsmVsZombies"));
+        vscode.env.openExternal(vscode.Uri.parse("https://gitee.com/vector-wlc/AsmVsZombies"));
     });
 
     const getPvzExePath = vscode.commands.registerCommand("AsmVsZombies.getPvzExePath", () => {
@@ -64,10 +64,9 @@ export function activate(context: vscode.ExtensionContext) {
             canSelectMany: false,
             openLabel: vscode.l10n.t("Open the AvZ installation directory")
         };
-
-        vscode.window.showOpenDialog(options).then(dir => {
-            if (dir && dir.length > 0) {
-                avz.setAvzDir(dir[0].fsPath);
+        vscode.window.showOpenDialog(options).then(urls => {
+            if (urls && urls.length > 0) {
+                avz.setAvzDir(urls[0].fsPath);
             }
         });
     });
