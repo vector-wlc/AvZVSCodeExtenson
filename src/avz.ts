@@ -56,9 +56,9 @@ export class Avz {
     }
 
 
-    private static execute(cmd: string): Promise<[error: ExecException | null, stdout: string]> {
+    private static execute(command: string): Promise<[error: ExecException | null, stdout: string]> {
         return new Promise(callback => {
-            exec(cmd, (error, stdout) => { callback([error, stdout]); });
+            exec(command, (error, stdout) => { callback([error, stdout]); });
         });
     }
 
@@ -129,9 +129,9 @@ export class Avz {
     }
 
 
-    public runCmd(cmd: string): void {
+    public runCmd(command: string): void {
         this.avzTerminal ??= vscode.window.createTerminal("AvZ", "cmd");
-        this.avzTerminal.sendText(cmd);
+        this.avzTerminal.sendText(command);
         this.avzTerminal.show();
     }
 
@@ -242,7 +242,7 @@ export class Avz {
                 throw new Error("Source files not found");
             }
             const customOptions = vscode.workspace.getConfiguration().get<string[]>("avzConfigure.compileOptions")!;
-            const compileCmd = templateStrs.generateCompileCmd(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
+            const compileCmd = templateStrs.getAvzCompileCommand(this.avzDir, this.envType).replaceAll("__CUSTOM_ARGS__", customOptions.join(" "));
             const cpuCnt = os.availableParallelism();
             const increment = (1 / srcFileCnt) * 100;
             let finishCnt = 0;
@@ -251,8 +251,8 @@ export class Avz {
             const worker = async (taskList: number[]) => {
                 for (const idx of taskList) {
                     const srcFile = srcFiles[idx];
-                    const cmd = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
-                    const [err] = await Avz.execute(cmd);
+                    const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
+                    const [err] = await Avz.execute(command);
                     if (err !== null) { // 继续编译
                         vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
@@ -278,13 +278,10 @@ export class Avz {
                 fs.unlinkSync(libavzPath);
             }
 
-            execSync(templateStrs.generatePackCmd(this.avzDir)); // may throw
-
-            for (const srcFile of srcFiles) {
-                const path = `${this.avzDir}/src/${srcFile}.o`;
-                if (fs.existsSync(path)) {
-                    fs.unlinkSync(path);
-                }
+            const objFilePaths = srcFiles.map(srcFile => `${this.avzDir}/src/${srcFile}.o`).filter(path => fs.existsSync(path));
+            execSync(templateStrs.getAvzPackCommand(this.avzDir, objFilePaths)); // may throw
+            for (const path of objFilePaths) {
+                fs.unlinkSync(path);
             }
         };
 

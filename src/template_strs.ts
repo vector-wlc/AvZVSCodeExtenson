@@ -82,7 +82,7 @@ export const generateLaunchJson = (avzDir: string, _: number) => `{
             "type": "lldb-dap",
             "request": "attach",
             "program": "\${command:AsmVsZombies.getPvzExePath}",
-            "preLaunchTask": "avz",
+            "preLaunchTask": "avz"
         }
     ]
 }`;
@@ -108,16 +108,22 @@ BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
 `.trimStart();
 
-export const generateMetadataJson = (_: string, envType: number) => `{
-    "compileOptions": "${envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result"} __CUSTOM_ARGS__ \\"__FILE_NAME__\\" -isystem \\"__AVZ_DIR__/inc\\" -lavz ${envType === 1 ? "-lgdi32" : "-lgdi32 -ldbghelp"} -L \\"__AVZ_DIR__/bin\\" -shared -o \\"bin/libavz.dll\\""
-}`;
+const flagsOfAvz1 = "-std=c++1z -Wno-sign-compare";
+const flagsOfAvz2 = "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result";
 
-
-export function generateCompileCmd(avzDir: string, envType: number): string {
-    const cmd1 = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++"`;
-    const cmd2 = envType === 1 ? "-std=c++1z -Wno-sign-compare" : "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result";
-    const cmd3 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
-    return [cmd1, cmd2, cmd3].join(" ");
+export function generateMetadataJson(_: string, envType: number): string {
+    const flag1 = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
+    const flag2 = envType === 1 ? "" : "-ldbghelp";
+    return JSON.stringify({
+        compileOptions: `${flag1} __CUSTOM_ARGS__ "__FILE_NAME__" -isystem "__AVZ_DIR__/inc" -lavz -lgdi32 ${flag2} -L "__AVZ_DIR__/bin" -shared -o "bin/libavz.dll"`
+    }, null, 4);
 }
 
-export const generatePackCmd = (avzDir: string) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -crs "${avzDir}/bin/libavz.a" ${avzDir}/src/*.o`;
+export function getAvzCompileCommand(avzDir: string, envType: number): string {
+    const command = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++"`;
+    const flag1 = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
+    const flag2 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
+    return [command, flag1, flag2].join(" ");
+}
+
+export const getAvzPackCommand = (avzDir: string, objFilePaths: readonly string[]) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -crs "${avzDir}/bin/libavz.a"`.concat(...objFilePaths.map(path => ` "${path}"`));
