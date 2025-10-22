@@ -107,8 +107,7 @@ export class Avz {
             dirPath = dirPath.slice(0, -1);
         }
 
-        const entryPaths = fs.readdirSync(dirPath).map(entryName => dirPath + "/" + entryName);
-        const paths = [dirPath].concat(entryPaths);
+        const paths = [dirPath, ...fs.readdirSync(dirPath).map(entryName => dirPath + "/" + entryName)];
         for (const path of paths) {
             if (fs.existsSync(path + "/MinGW")) { // 确定 AsmVsZombies 子目录
                 this.avzDir = path;
@@ -182,47 +181,6 @@ export class Avz {
 
     public runScriptMaskCmd(): void {
         this.runScripImp(true);
-    }
-
-
-    private recommendClangd(): void {
-        if (this.envType === 1 // AvZ 1 环境包中不包含 clangd
-            || vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
-            return;
-        }
-        const message = vscode.l10n.t("It is recommended to install the clangd extension for a better code hinting and formatting experience.");
-        const install = vscode.l10n.t("Install");
-        vscode.window.showInformationMessage(message, install).then(selection => {
-            if (selection === install) {
-                vscode.commands.executeCommand("extension.open", Avz.clangdId);
-            }
-        });
-    }
-
-
-    public async updateAvz(): Promise<void> {
-        if (!Avz.hasOpenFolder()) {
-            return;
-        }
-        if ((this.avzDir === "") && !this.setAvzDir()) {
-            return;
-        }
-
-        const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
-
-        // 下载版本列表
-        const avzVersionTxtUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
-        const avzVersionTxtPath = this.tmpDir + "/version.txt";
-        const avzVersion = await fileUtils.downloadToPick(avzVersionTxtUrl, avzVersionTxtPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
-
-        // 下载 AvZ 压缩包
-        const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
-        const avzFilePath = this.tmpDir + "/avz.zip";
-        await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
-
-        execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
-        vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
-        this.recommendClangd();
     }
 
 
@@ -320,6 +278,47 @@ export class Avz {
             vscode.window.showInformationMessage(vscode.l10n.t("Process ID of PvZ has been found: ") + pid);
         }
         return pid;
+    }
+
+
+    private recommendClangd(): void {
+        if (this.envType === 1 // AvZ 1 环境包中不包含 clangd
+            || vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
+            return;
+        }
+        const message = vscode.l10n.t("It is recommended to install the clangd extension for a better code hinting and formatting experience.");
+        const install = vscode.l10n.t("Install");
+        vscode.window.showInformationMessage(message, install).then(selection => {
+            if (selection === install) {
+                vscode.commands.executeCommand("extension.open", Avz.clangdId);
+            }
+        });
+    }
+
+
+    public async updateAvz(): Promise<void> {
+        if (!Avz.hasOpenFolder()) {
+            return;
+        }
+        if ((this.avzDir === "") && !this.setAvzDir()) {
+            return;
+        }
+
+        const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
+
+        // 下载版本列表
+        const avzVersionTxtUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
+        const avzVersionTxtPath = this.tmpDir + "/version.txt";
+        const avzVersion = await fileUtils.downloadToPick(avzVersionTxtUrl, avzVersionTxtPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
+
+        // 下载 AvZ 压缩包
+        const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
+        const avzFilePath = this.tmpDir + "/avz.zip";
+        await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
+
+        execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
+        vscode.window.showInformationMessage(vscode.l10n.t("AvZ updated successfully."));
+        this.recommendClangd();
     }
 
 
