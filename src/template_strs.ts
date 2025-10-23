@@ -120,10 +120,8 @@ export function generateMetadataJson(_: string, envType: number): string {
 }
 
 export function getAvzCompileCommand(avzDir: string, envType: number): string {
-    const command = `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++"`;
-    const flag1 = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
-    const flag2 = `__CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
-    return [command, flag1, flag2].join(" ");
+    const flag = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
+    return `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++" ${flag} __CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
 }
 
-export const getAvzPackCommand = (avzDir: string, objFilePaths: readonly string[]) => `set "PATH=${avzDir}/MinGW/bin;%PATH%" && ar -crs "${avzDir}/bin/libavz.a"`.concat(...objFilePaths.map(path => ` "${path}"`));
+export const getAvzPackCommand = (avzDir: string) => `for /r "${avzDir}/src" %f in (*.o) do @"${avzDir}/MinGW/bin/ar" -rcs "${avzDir}/bin/libavz.a" "%f" && @del "%f"`;

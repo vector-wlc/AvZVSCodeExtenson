@@ -208,7 +208,7 @@ export class Avz {
             const increment = (1 / srcFileCnt) * 100;
             let finishCnt = 0;
 
-            // 多进程加速编译
+            // 每个进程的任务
             const worker = async (taskList: number[]) => {
                 for (const idx of taskList) {
                     const srcFile = srcFiles[idx];
@@ -231,7 +231,6 @@ export class Avz {
                 taskTable[idx % cpuCnt].push(idx);
             }
 
-            // 执行任务, 并等待任务完成
             await Promise.all(taskTable.map(worker));
 
             const libavzPath = this.avzDir + "/bin/libavz.a";
@@ -239,11 +238,7 @@ export class Avz {
                 fs.unlinkSync(libavzPath);
             }
 
-            const objFilePaths = srcFiles.map(srcFile => `${this.avzDir}/src/${srcFile}.o`).filter(path => fs.existsSync(path));
-            execSync(templateStrs.getAvzPackCommand(this.avzDir, objFilePaths)); // may throw
-            for (const path of objFilePaths) {
-                fs.unlinkSync(path);
-            }
+            execSync(templateStrs.getAvzPackCommand(this.avzDir)); // pack & clean
         };
 
         const progressOptions: vscode.ProgressOptions = {
