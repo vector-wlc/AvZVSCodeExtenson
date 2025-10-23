@@ -262,7 +262,7 @@ export class Avz {
 
     public getPvzExePath(): string {
         const pvzExeName = vscode.workspace.getConfiguration().get<string>("avzConfigure.pvzExeName")!;
-        const output = execSync(`wmic process where name="${pvzExeName}" get ExecutablePath`).toString();
+        const output = execSync(`wmic process where name="${pvzExeName}" get ExecutablePath`, { encoding: "utf8" });
         const exePath = output.split("\n")[1].trim();
         if (exePath === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
@@ -275,7 +275,7 @@ export class Avz {
 
     public getPvzProcessId(): string {
         const pvzExeName = vscode.workspace.getConfiguration().get<string>("avzConfigure.pvzExeName")!;
-        const output = execSync(`wmic process where name="${pvzExeName}" get ProcessId`).toString();
+        const output = execSync(`wmic process where name="${pvzExeName}" get ProcessId`, { encoding: "utf8" });
         const pid = output.split("\n")[1].trim();
         if (pid === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
@@ -343,7 +343,11 @@ export class Avz {
         if (!this.refreshAvzDir() || !this.refreshAvzVersion()) {
             return;
         }
-        vscode.window.showInformationMessage(`AvZ ${this.envType} ${this.avzVersion}`);
+        let info = `AvZ ${this.envType} | ${this.avzVersion} | "${this.avzDir}"`;
+        if (this.envType === 2) {
+            info.concat(" | ", execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`, { encoding: "utf8" }).split("-")[0]);
+        }
+        vscode.window.showInformationMessage(info);
     }
 
 
