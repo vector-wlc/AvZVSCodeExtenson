@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.7.0] 2025/10/25
+
+* 修复了脚本在编译时可能尚未保存成功的问题
+* 重命名命令:
+    - `AvZ: Update` => `AvZ: Update AvZ`
+    - `AvZ: Get AvZ Extension` => `AvZ: Download AvZ Extension`
+    - `AvZ: Get AvZ Info` => `AvZ: Show AvZ Info`
+* 修复了构建 AvZ 时无法链接源文件目录的子目录下的文件的问题
+
 ## [0.6.22] 2025/10/19
 
 * 优化了一些代码
