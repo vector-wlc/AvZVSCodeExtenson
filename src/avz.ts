@@ -91,7 +91,7 @@ export class Avz {
      * @retval true: 成功设置 AvZ 目录
      * @retval false: 失败
      */
-    public setAvzDir(selectedPath?: string): boolean {
+    private setAvzDir(selectedPath?: string): boolean {
         if (!Avz.hasOpenFolder()) {
             return false;
         }
@@ -115,12 +115,32 @@ export class Avz {
             this.createConfigFiles();
             vscode.workspace.getConfiguration().update("avzConfigure.avzDir", this.avzDir, false);
             if (selectedPath !== undefined) {
-                vscode.window.showInformationMessage(vscode.l10n.t("AvZ installation directory has been found: ") + this.avzDir);
+                vscode.window.showInformationMessage(vscode.l10n.t("AvZ installation directory has been found: {0}", this.avzDir));
             }
             return true;
         }
-        vscode.window.showErrorMessage(vscode.l10n.t("The valid AvZ installation directory was not found, try re-running the command \"AvZ: Set AvZ Dir\"."));
+        const message = vscode.l10n.t("The valid AvZ installation directory was not found, try resetting AvZ directory.");
+        const option = vscode.l10n.t("Set AvZ directory");
+        vscode.window.showErrorMessage(message, option).then(selection => {
+            if (selection === option) {
+                this.selectAvzFolder();
+            }
+        });
         return false;
+    }
+
+
+    public selectAvzFolder(): void {
+        vscode.window.showOpenDialog({
+            canSelectFolders: true,
+            canSelectFiles: false,
+            canSelectMany: false,
+            openLabel: vscode.l10n.t("Select AvZ installed directory")
+        }).then(folders => {
+            if (folders && folders.length > 0) {
+                this.setAvzDir(folders[0].fsPath);
+            }
+        });
     }
 
 
@@ -262,7 +282,7 @@ export class Avz {
         if (exePath === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
         } else {
-            vscode.window.showInformationMessage(vscode.l10n.t("Executable path of PvZ has been found: ") + exePath);
+            vscode.window.showInformationMessage(vscode.l10n.t("Executable path of PvZ has been found: {0}", exePath));
         }
         return exePath;
     }
@@ -275,7 +295,7 @@ export class Avz {
         if (pid === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
         } else {
-            vscode.window.showInformationMessage(vscode.l10n.t("Process ID of PvZ has been found: ") + pid);
+            vscode.window.showInformationMessage(vscode.l10n.t("Process ID of PvZ has been found: {0}", pid));
         }
         return pid;
     }
@@ -287,9 +307,9 @@ export class Avz {
             return;
         }
         const message = vscode.l10n.t("It is recommended to install the clangd extension for a better code hinting and formatting experience.");
-        const install = vscode.l10n.t("Install");
-        vscode.window.showInformationMessage(message, install).then(selection => {
-            if (selection === install) {
+        const option = vscode.l10n.t("Install");
+        vscode.window.showInformationMessage(message, option).then(selection => {
+            if (selection === option) {
                 vscode.commands.executeCommand("extension.open", Avz.clangdId);
             }
         });

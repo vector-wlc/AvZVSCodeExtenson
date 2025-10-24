@@ -58,17 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const setAvzDir = vscode.commands.registerCommand("AsmVsZombies.setAvzDir", () => {
-        const options: vscode.OpenDialogOptions = {
-            canSelectFolders: true,
-            canSelectFiles: false,
-            canSelectMany: false,
-            openLabel: vscode.l10n.t("Open the AvZ installation directory")
-        };
-        vscode.window.showOpenDialog(options).then(urls => {
-            if (urls && urls.length > 0) {
-                avz.setAvzDir(urls[0].fsPath);
-            }
-        });
+        avz.selectAvzFolder();
     });
 
     const downloadAvzExtension = vscode.commands.registerCommand("AsmVsZombies.downloadAvzExtension", () => {
