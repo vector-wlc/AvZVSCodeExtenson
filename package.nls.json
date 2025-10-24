@@ -1,14 +1,14 @@
 {
     "AsmVsZombies.runScriptInTerminal.title": "AvZ: Run Script",
     "AsmVsZombies.runScript.title": "AvZ: Run Script Mask Cmd",
-    "AsmVsZombies.updateAvz.title": "AvZ: Update",
+    "AsmVsZombies.updateAvz.title": "AvZ: Update AvZ",
     "AsmVsZombies.openAvzTutorial.title": "AvZ: Open Tutorial",
     "AsmVsZombies.setAvzDir.title": "AvZ: Set AvZ Dir",
     "AsmVsZombies.getPvzExePath.title": "AvZ: Get PvZ Exe Name",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: Get PvZ Process Id",
-    "AsmVsZombies.getAvzExtension.title": "AvZ: Get AvZ Extension",
+    "AsmVsZombies.downloadAvzExtension.title": "AvZ: Download AvZ Extension",
     "AsmVsZombies.buildAvz.title": "AvZ: Build AvZ",
-    "AsmVsZombies.getAvzInfo.title": "AvZ: Get AvZ Info",
+    "AsmVsZombies.showAvzInfo.title": "AvZ: Show AvZ Info",
 
     "avzConfigure.avzDir.description": "Path to root directory of AvZ.",
     "avzConfigure.pvzExeName.description": "Name of executable of PvZ.",

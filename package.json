@@ -53,16 +53,16 @@
                 "title": "%AsmVsZombies.getPvzProcessId.title%"
             },
             {
-                "command": "AsmVsZombies.getAvzExtension",
-                "title": "%AsmVsZombies.getAvzExtension.title%"
+                "command": "AsmVsZombies.downloadAvzExtension",
+                "title": "%AsmVsZombies.downloadAvzExtension.title%"
             },
             {
                 "command": "AsmVsZombies.buildAvz",
                 "title": "%AsmVsZombies.buildAvz.title%"
             },
             {
-                "command": "AsmVsZombies.getAvzInfo",
-                "title": "%AsmVsZombies.getAvzInfo.title%"
+                "command": "AsmVsZombies.showAvzInfo",
+                "title": "%AsmVsZombies.showAvzInfo.title%"
             }
         ],
         "menus": {

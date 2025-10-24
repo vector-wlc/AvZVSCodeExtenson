@@ -71,16 +71,16 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
-    const getAvzExtension = vscode.commands.registerCommand("AsmVsZombies.getAvzExtension", () => {
-        return avz.getAvzExtension();
+    const downloadAvzExtension = vscode.commands.registerCommand("AsmVsZombies.downloadAvzExtension", () => {
+        avz.fetchAvzExtension();
     });
 
     const buildAvz = vscode.commands.registerCommand("AsmVsZombies.buildAvz", () => {
         avz.buildAvz();
     });
 
-    const getAvzInfo = vscode.commands.registerCommand("AsmVsZombies.getAvzInfo", () => {
-        avz.getAvzInfo();
+    const showAvzInfo = vscode.commands.registerCommand("AsmVsZombies.showAvzInfo", () => {
+        avz.showAvzInfo();
     });
 
     context.subscriptions.push(
@@ -92,9 +92,9 @@ export function activate(context: vscode.ExtensionContext) {
         setAvzDir,
         getPvzExePath,
         getPvzProcessId,
-        getAvzExtension,
+        downloadAvzExtension,
         buildAvz,
-        getAvzInfo
+        showAvzInfo
     );
 }
 

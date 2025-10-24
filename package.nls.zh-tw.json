@@ -1,14 +1,14 @@
 {
     "AsmVsZombies.runScriptInTerminal.title": "AvZ: 執行指令碼",
     "AsmVsZombies.runScript.title": "AvZ: 執行指令碼（隱藏終端）",
-    "AsmVsZombies.updateAvz.title": "AvZ: 更新",
+    "AsmVsZombies.updateAvz.title": "AvZ: 更新 AvZ",
     "AsmVsZombies.openAvzTutorial.title": "AvZ: 開啟教程",
     "AsmVsZombies.setAvzDir.title": "AvZ: 設定 AvZ 目錄",
     "AsmVsZombies.getPvzExePath.title": "AvZ: 獲取 PvZ 執行檔路徑",
     "AsmVsZombies.getPvzProcessId.title": "AvZ: 獲取 PvZ 行程 ID",
-    "AsmVsZombies.getAvzExtension.title": "AvZ: 獲取 AvZ 擴充套件",
+    "AsmVsZombies.downloadAvzExtension.title": "AvZ: 下載 AvZ 擴充套件",
     "AsmVsZombies.buildAvz.title": "AvZ: 構建 AvZ",
-    "AsmVsZombies.getAvzInfo.title": "AvZ: 獲取 AvZ 版本資訊",
+    "AsmVsZombies.showAvzInfo.title": "AvZ: 顯示 AvZ 版本資訊",
 
     "avzConfigure.avzDir.description": "AvZ 安裝路徑。",
     "avzConfigure.pvzExeName.description": "PvZ 執行檔名稱。",

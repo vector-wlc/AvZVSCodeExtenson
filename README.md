@@ -10,11 +10,11 @@
 
 - **设置 AvZ 安装目录**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Set AvZ Dir`。
 
-- **获取 AvZ 版本信息**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Get AvZ Info`。
+- **显示 AvZ 版本信息**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Show AvZ Info`。
 
-- **进行 AvZ 版本的更新与回退**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Update`。
+- **进行 AvZ 版本的更新与回退**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Update AvZ`。
 
-- **获取 AvZ 插件**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Get AvZ Extension`。
+- **下载 AvZ 插件**：按下 `Ctrl + Shift + P` 调出命令面板后输入 `AvZ: Download AvZ Extension`。
 
 - **运行脚本**：点击鼠标右键后选择菜单中的 `AvZ: Run Script`。
 

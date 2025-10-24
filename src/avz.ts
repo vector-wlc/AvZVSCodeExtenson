@@ -303,9 +303,9 @@ export class Avz {
         const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
 
         // 下载版本列表
-        const avzVersionTxtUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
-        const avzVersionTxtPath = this.tmpDir + "/version.txt";
-        const avzVersion = await fileUtils.downloadToPick(avzVersionTxtUrl, avzVersionTxtPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
+        const avzVersionListUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
+        const avzVersionListPath = this.tmpDir + "/version.txt";
+        const avzVersion = await fileUtils.downloadToPick(avzVersionListUrl, avzVersionListPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
 
         // 下载 AvZ 压缩包
         const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
@@ -334,7 +334,7 @@ export class Avz {
     }
 
 
-    public getAvzInfo(): void {
+    public showAvzInfo(): void {
         if (!this.refreshAvzDir() || !this.refreshAvzVersion()) {
             return;
         }
@@ -359,7 +359,7 @@ export class Avz {
     }
 
 
-    public async getAvzExtension(): Promise<void> {
+    public async fetchAvzExtension(): Promise<void> {
         if (!this.refreshAvzDir()) {
             return;
         }
@@ -370,11 +370,11 @@ export class Avz {
         const extensionListPath = this.tmpDir + "/extension_list.txt";
         const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension"));
 
-        const versionTxtUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
-        const versionTxtPath = this.tmpDir + "/version.txt";
-        const version = await fileUtils.downloadToPick(versionTxtUrl, versionTxtPath, vscode.l10n.t("Select Version"));
+        const versionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
+        const versionListPath = this.tmpDir + "/version.txt";
+        const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version"));
 
-        await this.installExtension(fullName, version, true);
+        await this.downloadAvzExtension(fullName, version, true);
     }
 
 
@@ -385,7 +385,7 @@ export class Avz {
     }
 
 
-    private async installExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false): Promise<void> {
+    private async downloadAvzExtension(extensionFullName: string, extensionVersion: string, isForceInstall: boolean = false): Promise<void> {
         const extensionName = extensionFullName.split("/")[1];
         const hasInstalled = this.extensionInstalledList.has(extensionName);
         if (hasInstalled && !isForceInstall) {
@@ -408,15 +408,15 @@ export class Avz {
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.refreshAvzVersion();
-                const needAvzVersion = line.split(" ")[1];
-                if (!needAvzVersion.includes(this.avzVersion)) {
-                    vscode.window.showWarningMessage(vscode.l10n.t("The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!", extensionName, needAvzVersion, this.avzVersion));
+                const avzVersionNeeded = line.split(" ")[1];
+                if (!avzVersionNeeded.includes(this.avzVersion)) {
+                    vscode.window.showWarningMessage(vscode.l10n.t("The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!", extensionName, avzVersionNeeded, this.avzVersion));
                 }
             } else if (lineNum > 1) {
                 const [name, version] = line.split(" ");
                 const fullName = this.getExtensionFullName(name);
                 if (fullName !== undefined) {
-                    await this.installExtension(fullName, version);
+                    await this.downloadAvzExtension(fullName, version);
                 } else {
                     vscode.window.showErrorMessage(vscode.l10n.t("Extension \"{0}\" not found.", name));
                 }
