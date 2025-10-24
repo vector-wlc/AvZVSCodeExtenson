@@ -355,12 +355,14 @@ export class Avz {
 
 
     public showAvzInfo(): void {
-        if (!this.refreshAvzDir() || !this.refreshAvzVersion()) {
+        if (!this.refreshAvzDir()) {
             return;
         }
+        this.refreshAvzVersion();
         let info = `AvZ ${this.envType} | ${this.avzVersion} | "${this.avzDir}"`;
         if (this.envType === 2) {
-            info.concat(" | ", execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`, { encoding: "utf8" }).split("-")[0]);
+            const cpu = execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`, { encoding: "utf8" }).split("-", 1)[0];
+            info = info.concat(" | ", cpu);
         }
         vscode.window.showInformationMessage(info);
     }
@@ -424,7 +426,7 @@ export class Avz {
         }
 
         // 读取插件的依赖列表
-        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`).map(line => line.trim());
+        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`);
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.refreshAvzVersion();
