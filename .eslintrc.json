@@ -12,9 +12,54 @@
         "@typescript-eslint/naming-convention": [
             "warn",
             {
+                "selector": "default",
+                "format": [
+                    "camelCase"
+                ]
+            },
+            {
+                "selector": "variable",
+                "format": [
+                    "camelCase",
+                    "UPPER_CASE"
+                ],
+                "modifiers": [
+                    "const"
+                ]
+            },
+            {
+                "selector": "parameter",
+                "format": [
+                    "camelCase"
+                ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "typeLike",
+                "format": [
+                    "PascalCase"
+                ]
+            },
+            {
                 "selector": "enumMember",
                 "format": [
                     "UPPER_CASE"
+                ]
+            },
+            {
+                "selector": [
+                    "classProperty",
+                    "objectLiteralProperty",
+                    "typeProperty",
+                    "classMethod",
+                    "objectLiteralMethod",
+                    "typeMethod",
+                    "accessor",
+                    "enumMember"
+                ],
+                "format": null,
+                "modifiers": [
+                    "requiresQuotes"
                 ]
             }
         ],
