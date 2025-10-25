@@ -22,22 +22,19 @@ import * as https from 'https';
 import { pipeline } from 'stream';
 import * as vscode from 'vscode';
 
-export function mkDir(dirName: string): boolean {
-    if (fs.existsSync(dirName)) {
-        return true;
+export function mkdir(dirName: string): void {
+    if (!fs.existsSync(dirName)) {
+        fs.mkdirSync(dirName);
     }
-    fs.mkdirSync(dirName);
-    return fs.existsSync(dirName);
 }
 
-export const readFile = (path: string): string[] => fs.readFileSync(path, "utf8").trimEnd().replaceAll("\r", "").split("\n");
+export const readFileLines = (path: string): string[] => fs.readFileSync(path, "utf8").trimEnd().replaceAll("\r", "").split("\n");
 
 export function writeFile(path: string, str: string, canOverwrite: boolean = true): void {
     if (!fs.existsSync(path) || canOverwrite) {
         fs.writeFileSync(path, str);
     }
 }
-
 
 export function downloadFile(srcUrl: string, destPath: string, showProgress: boolean = false): Thenable<void> {
     const showErrorMessage = (error: string) => {
@@ -90,19 +87,18 @@ export function downloadFile(srcUrl: string, destPath: string, showProgress: boo
     }, download);
 };
 
-
 export const downloadToPick = (
     srcUrl: string,
     destPath: string,
     title: string,
-    pred?: (selection: string) => boolean
+    pred?: (option: string) => boolean // 用于过滤选项的谓词
 ) => new Promise<string>(callback => {
     downloadFile(srcUrl, destPath).then(() => {
-        const list = readFile(destPath).filter(pred ?? (() => true));
-        if (list.length === 0) {
+        const options = readFileLines(destPath).filter(pred ?? (() => true));
+        if (options.length === 0) {
             return;
         }
-        vscode.window.showQuickPick(list, { title: title }).then(selection => {
+        vscode.window.showQuickPick(options, { title: title }).then(selection => {
             if (selection) {
                 callback(selection);
             }

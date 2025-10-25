@@ -48,7 +48,7 @@ export class Avz {
     private extensionInstalledList = new Set<string>();
 
     constructor() {
-        fileUtils.mkDir(this.tmpDir);
+        fileUtils.mkdir(this.tmpDir);
     }
 
 
@@ -70,8 +70,8 @@ export class Avz {
 
     private createConfigFiles(): void {
         const projectDir = vscode.workspace.workspaceFolders![0].uri.fsPath;
-        fileUtils.mkDir(projectDir + "/bin");
-        fileUtils.mkDir(projectDir + "/.vscode");
+        fileUtils.mkdir(projectDir + "/bin");
+        fileUtils.mkdir(projectDir + "/.vscode");
         fileUtils.writeFile(projectDir + "/.vscode/c_cpp_properties.json", templateStrs.generateCCppJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/settings.json", templateStrs.generateSettingsJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/tasks.json", templateStrs.generateTasksJson(this.avzDir, this.envType), false);
@@ -338,7 +338,7 @@ export class Avz {
         if (this.avzVersion !== "") {
             return true;
         }
-        const lines = fileUtils.readFile(this.avzDir + "/inc/libavz.h");
+        const lines = fileUtils.readFileLines(this.avzDir + "/inc/libavz.h");
         for (const line of lines) {
             if (line.includes("__AVZ_VERSION__")) {
                 const version = line.split(" ")[2];
@@ -398,7 +398,7 @@ export class Avz {
 
     private getExtensionFullName(name: string): string | undefined {
         const extensionListPath = this.tmpDir + "/extension_list.txt";
-        const extensionList = fileUtils.readFile(extensionListPath).map(line => line.trimEnd());
+        const extensionList = fileUtils.readFileLines(extensionListPath).map(line => line.trimEnd());
         return extensionList.find(fullName => fullName.endsWith("/" + name));
     }
 
@@ -421,7 +421,7 @@ export class Avz {
         vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" was installed successfully.", extensionName));
 
         // 读取插件的依赖列表
-        const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`);
+        const lines = fileUtils.readFileLines(`${this.avzDir}/inc/${extensionName}/information.txt`);
         for (const [lineNum, line] of lines.entries()) {
             if (lineNum === 1) { // AvZ Version
                 this.refreshAvzVersion();
