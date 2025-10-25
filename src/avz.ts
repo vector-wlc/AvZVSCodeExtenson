@@ -24,24 +24,21 @@ import * as vscode from 'vscode';
 import * as fileUtils from './file_utils';
 import * as templateStrs from './template_strs';
 
-const enum RepoType {
-    GITHUB = "GitHub",
-    GITLAB = "GitLab",
-    GITEE = "Gitee"
-}
+type RepoType = "GitHub" | "GitLab" | "Gitee";
+
+const CLANGD_EXTENSION_ID = "llvm-vs-code-extensions.vscode-clangd";
 
 export class Avz {
-    private static readonly avzRepoUrl: ReadonlyMap<string, string> = new Map([
-        [RepoType.GITHUB, "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
-        [RepoType.GITLAB, "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
-        [RepoType.GITEE, "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
-    ]);
-    private static readonly extensionRepoUrl: ReadonlyMap<string, string> = new Map([
-        [RepoType.GITHUB, "https://github.com/qrmd0/AvZLib/raw/main"],
-        [RepoType.GITLAB, "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
-        [RepoType.GITEE, "https://gitee.com/qrmd/AvZLib/raw/main"],
-    ]);
-    private static readonly clangdId = "llvm-vs-code-extensions.vscode-clangd";
+    private static readonly avzRepoUrl: Readonly<Record<RepoType, string>> = {
+        "GitHub": "https://github.com/vector-wlc/AsmVsZombies/raw/master",
+        "GitLab": "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master",
+        "Gitee": "https://gitee.com/vector-wlc/AsmVsZombies/raw/master",
+    };
+    private static readonly extensionRepoUrl: Readonly<Record<RepoType, string>> = {
+        "GitHub": "https://github.com/qrmd0/AvZLib/raw/main",
+        "GitLab": "https://gitlab.com/avzlib/AvZLib/-/raw/main",
+        "Gitee": "https://gitee.com/qrmd/AvZLib/raw/main",
+    };
 
     private readonly tmpDir: string = os.tmpdir() + "/AsmVsZombies";
     private avzDir = "";
@@ -49,7 +46,6 @@ export class Avz {
     private avzVersion = "";
     private envType = 0;
     private extensionInstalledList = new Set<string>();
-
 
     constructor() {
         fileUtils.mkDir(this.tmpDir);
@@ -80,7 +76,7 @@ export class Avz {
         fileUtils.writeFile(projectDir + "/.vscode/settings.json", templateStrs.generateSettingsJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/tasks.json", templateStrs.generateTasksJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/launch.json", templateStrs.generateLaunchJson(this.avzDir, this.envType), false);
-        if (vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
+        if (vscode.extensions.getExtension(CLANGD_EXTENSION_ID) !== undefined) {
             fileUtils.writeFile(projectDir + "/.clang-format", templateStrs.generateClangFormat(this.avzDir, this.envType), false);
         }
         fileUtils.writeFile(this.avzDir + "/metadata.json", templateStrs.generateMetadataJson(this.avzDir, this.envType), false);
@@ -303,14 +299,14 @@ export class Avz {
 
     private recommendClangd(): void {
         if (this.envType === 1 // AvZ 1 环境包中不包含 clangd
-            || vscode.extensions.getExtension(Avz.clangdId) !== undefined) {
+            || vscode.extensions.getExtension(CLANGD_EXTENSION_ID) !== undefined) {
             return;
         }
         const message = vscode.l10n.t("It is recommended to install the clangd extension for a better code hinting and formatting experience.");
         const option = vscode.l10n.t("Install");
         vscode.window.showInformationMessage(message, option).then(selection => {
             if (selection === option) {
-                vscode.commands.executeCommand("extension.open", Avz.clangdId);
+                vscode.commands.executeCommand("extension.open", CLANGD_EXTENSION_ID);
             }
         });
     }
@@ -320,15 +316,15 @@ export class Avz {
         if (!this.refreshAvzDir()) {
             return;
         }
-        const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
+        const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
 
         // 下载版本列表
-        const avzVersionListUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
+        const avzVersionListUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/version.txt`;
         const avzVersionListPath = this.tmpDir + "/version.txt";
         const avzVersion = await fileUtils.downloadToPick(avzVersionListUrl, avzVersionListPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
 
         // 下载 AvZ 压缩包
-        const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
+        const avzFileUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/${avzVersion}`;
         const avzFilePath = this.tmpDir + "/avz.zip";
         await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
 
@@ -386,13 +382,13 @@ export class Avz {
             return;
         }
         this.refreshExtensionList();
-        const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
+        const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
 
-        const extensionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/extension_list.txt`;
+        const extensionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/extension_list.txt`;
         const extensionListPath = this.tmpDir + "/extension_list.txt";
         const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension"));
 
-        const versionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
+        const versionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${fullName}/version.txt`;
         const versionListPath = this.tmpDir + "/version.txt";
         const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version"));
 
@@ -414,16 +410,15 @@ export class Avz {
             vscode.window.showWarningMessage(vscode.l10n.t("You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.", extensionName));
             return;
         }
-        const downloadSrc = vscode.workspace.getConfiguration().get<string>("avzConfigure.downloadSource")!;
-        const extensionUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${extensionFullName}/release/${extensionVersion}.zip`;
+        const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
+        const extensionUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionPath = this.tmpDir + "/extension.zip";
         await fileUtils.downloadFile(extensionUrl, extensionPath, true);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionPath}" -aoa -o"${this.avzDir}/inc"`);
-        vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" was installed successfully.", extensionName));
-
         if (!hasInstalled) {
             this.extensionInstalledList.add(extensionName);
         }
+        vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" was installed successfully.", extensionName));
 
         // 读取插件的依赖列表
         const lines = fileUtils.readFile(`${this.avzDir}/inc/${extensionName}/information.txt`);
