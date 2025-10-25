@@ -31,11 +31,7 @@ export function run(): Promise<void> {
     const testsRoot = path.resolve(__dirname, '..');
 
     return new Promise((c, e) => {
-        glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
-            if (err) {
-                return e(err);
-            }
-
+        glob.glob('**/**.test.js', { cwd: testsRoot }).then((files) => {
             // Add files to the test suite
             files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
@@ -52,6 +48,6 @@ export function run(): Promise<void> {
                 console.error(err);
                 e(err);
             }
-        });
+        }, (err) => { e(err); });
     });
 }
