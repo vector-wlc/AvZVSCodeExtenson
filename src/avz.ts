@@ -87,21 +87,16 @@ export class Avz {
      * @retval true: 成功设置 AvZ 目录
      * @retval false: 失败
      */
-    private setAvzDir(selectedPath?: string): boolean {
+    private setAvzDir(dirPath: string, isManual: boolean = false): boolean {
         if (!Avz.hasOpenFolder()) {
             return false;
         }
-        let dirPath = selectedPath ?? vscode.workspace.getConfiguration().get<string>("avzConfigure.avzDir")!;
-        if (dirPath === "") {
-            dirPath = vscode.workspace.workspaceFolders![0].uri.fsPath;
-        }
 
-        dirPath = dirPath.replaceAll("\\", "/");
-        if (dirPath.endsWith("/")) {
-            dirPath = dirPath.slice(0, -1);
+        let rootPath = dirPath.replaceAll("\\", "/");
+        if (rootPath.endsWith("/")) {
+            rootPath = rootPath.slice(0, -1);
         }
-
-        const paths = [dirPath, ...fs.readdirSync(dirPath).map(entryName => dirPath + "/" + entryName)];
+        const paths = [rootPath].concat(isManual ? fs.readdirSync(rootPath).map(entryName => rootPath + "/" + entryName) : []);
         for (const path of paths) {
             if (!fs.existsSync(path + "/MinGW")) { // 确定 AsmVsZombies 子目录
                 continue;
@@ -110,7 +105,7 @@ export class Avz {
             this.envType = fs.existsSync(this.avzDir + "/MinGW/bin/libLLVM-15.dll") ? 2 : 1;
             this.createConfigFiles();
             vscode.workspace.getConfiguration().update("avzConfigure.avzDir", this.avzDir, false);
-            if (selectedPath !== undefined) {
+            if (isManual) {
                 vscode.window.showInformationMessage(vscode.l10n.t("AvZ installation directory has been found: {0}", this.avzDir));
             }
             return true;
@@ -127,6 +122,9 @@ export class Avz {
 
 
     public selectAvzFolder(): void {
+        if (!Avz.hasOpenFolder()) {
+            return;
+        }
         vscode.window.showOpenDialog({
             canSelectFolders: true,
             canSelectFiles: false,
@@ -134,7 +132,7 @@ export class Avz {
             openLabel: vscode.l10n.t("Select AvZ installed directory")
         }).then(folders => {
             if (folders && folders.length > 0) {
-                this.setAvzDir(folders[0].fsPath);
+                this.setAvzDir(folders[0].fsPath, true);
             }
         });
     }
@@ -144,7 +142,14 @@ export class Avz {
         if (this.avzDir !== "") {
             return true;
         }
-        return this.setAvzDir();
+        if (!Avz.hasOpenFolder()) {
+            return false;
+        }
+        let dirPath = vscode.workspace.getConfiguration().get<string>("avzConfigure.avzDir")!;
+        if (dirPath === "") {
+            dirPath = vscode.workspace.workspaceFolders![0].uri.fsPath;
+        }
+        return this.setAvzDir(dirPath);
     }
 
 
@@ -358,7 +363,7 @@ export class Avz {
         let info = `AvZ ${this.envType} | ${this.avzVersion} | "${this.avzDir}"`;
         if (this.envType === 2) {
             const cpu = execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`, { encoding: "utf8" }).split("-", 1)[0];
-            info = info.concat(" | ", cpu);
+            info += " | " + cpu;
         }
         vscode.window.showInformationMessage(info);
     }
