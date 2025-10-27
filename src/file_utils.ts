@@ -23,16 +23,18 @@ import { pipeline } from 'stream';
 import * as vscode from 'vscode';
 
 export function mkdir(dirName: string): void {
-    if (!fs.existsSync(dirName)) {
-        fs.mkdirSync(dirName);
-    }
+    fs.mkdirSync(dirName, { recursive: true });
 }
 
 export const readFileLines = (path: string): string[] => fs.readFileSync(path, "utf8").trimEnd().replaceAll("\r", "").split("\n");
 
 export function writeFile(path: string, str: string, canOverwrite: boolean = true): void {
-    if (!fs.existsSync(path) || canOverwrite) {
-        fs.writeFileSync(path, str);
+    try {
+        fs.writeFileSync(path, str, { flag: canOverwrite ? "w" : "wx" });
+    } catch (err) {
+        if (canOverwrite || ((err as NodeJS.ErrnoException).code !== "EEXIST")) {
+            throw err;
+        }
     }
 }
 
