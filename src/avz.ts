@@ -64,7 +64,7 @@ export class Avz {
 
 
     private static hasOpenFolder(): boolean {
-        if (vscode.workspace.workspaceFolders !== undefined) {
+        if (vscode.workspace.workspaceFolders) {
             return true;
         }
         vscode.window.showErrorMessage(vscode.l10n.t("You must have the folder open to exec the AvZ command!"));
@@ -80,7 +80,7 @@ export class Avz {
         fileUtils.writeFile(projectDir + "/.vscode/settings.json", templateStrs.generateSettingsJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/tasks.json", templateStrs.generateTasksJson(this.avzDir, this.envType), false);
         fileUtils.writeFile(projectDir + "/.vscode/launch.json", templateStrs.generateLaunchJson(this.avzDir, this.envType), false);
-        if (vscode.extensions.getExtension(CLANGD_EXTENSION_ID) !== undefined) {
+        if (vscode.extensions.getExtension(CLANGD_EXTENSION_ID)) {
             fileUtils.writeFile(projectDir + "/.clang-format", templateStrs.generateClangFormat(this.avzDir, this.envType), false);
         }
         fileUtils.writeFile(this.avzDir + "/metadata.json", templateStrs.generateMetadataJson(this.avzDir, this.envType), false);
@@ -173,7 +173,7 @@ export class Avz {
         if (!this.refreshAvzDir()) {
             return;
         }
-        if (vscode.window.activeTextEditor === undefined) {
+        if (!vscode.window.activeTextEditor) {
             vscode.window.showErrorMessage(vscode.l10n.t("Please open the script file that needs to be run"));
             return;
         }
@@ -197,7 +197,7 @@ export class Avz {
             return;
         }
         const [err] = await exec(command);
-        if (err !== null) {
+        if (err) {
             vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
         } else {
             vscode.window.showInformationMessage(vscode.l10n.t("Script was injected successfully."));
@@ -239,7 +239,7 @@ export class Avz {
                     const srcFile = srcFiles[idx];
                     const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await exec(command);
-                    if (err !== null) { // 继续编译
+                    if (err) { // 继续编译
                         vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
                     const percent = Math.round((++finishCnt / srcFileCnt) * 100);
@@ -308,7 +308,7 @@ export class Avz {
 
     private recommendClangd(): void {
         if (this.envType === 1 // AvZ 1 环境包中不包含 clangd
-            || vscode.extensions.getExtension(CLANGD_EXTENSION_ID) !== undefined) {
+            || vscode.extensions.getExtension(CLANGD_EXTENSION_ID)) {
             return;
         }
         const message = vscode.l10n.t("It is recommended to install the clangd extension for a better code hinting and formatting experience.");
@@ -441,7 +441,7 @@ export class Avz {
             } else if (lineNum > 1) {
                 const [name, version] = line.split(" ");
                 const fullName = this.getExtensionFullName(name);
-                if (fullName !== undefined) {
+                if (fullName) {
                     await this.downloadAvzExtension(fullName, version);
                 } else {
                     vscode.window.showErrorMessage(vscode.l10n.t("Extension \"{0}\" not found.", name));
