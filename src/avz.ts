@@ -17,7 +17,7 @@
  * AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exec, execSync, ExecException } from 'child_process';
+import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as vscode from 'vscode';
@@ -27,6 +27,17 @@ import * as templateStrs from './template_strs';
 type RepoType = "GitHub" | "GitLab" | "Gitee";
 
 const CLANGD_EXTENSION_ID = "llvm-vs-code-extensions.vscode-clangd";
+
+function exec(command: string): Promise<[error: Error | null, stdout: string]> {
+    return new Promise(callback => {
+        child_process.exec(command, (error, stdout) => { callback([error, stdout]); });
+    });
+}
+
+function execSync(command: string): string {
+    return child_process.execSync(command, { encoding: "utf8" });
+}
+
 
 export class Avz {
     private static readonly avzRepoUrl: Readonly<Record<RepoType, string>> = {
@@ -52,18 +63,11 @@ export class Avz {
     }
 
 
-    private static execute(command: string): Promise<[error: ExecException | null, stdout: string]> {
-        return new Promise(callback => {
-            exec(command, (error, stdout) => { callback([error, stdout]); });
-        });
-    }
-
-
     private static hasOpenFolder(): boolean {
         if (vscode.workspace.workspaceFolders !== undefined) {
             return true;
         }
-        vscode.window.showErrorMessage(vscode.l10n.t("You must have the folder open to execute the AvZ command!"));
+        vscode.window.showErrorMessage(vscode.l10n.t("You must have the folder open to exec the AvZ command!"));
         return false;
     }
 
@@ -186,13 +190,13 @@ export class Avz {
             .replaceAll("__AVZ_DIR__", this.avzDir)
             .replaceAll("__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
 
-        await Avz.execute("taskkill /f /im gdb32.exe"); // 杀死之前运行的调试器进程
+        await exec("taskkill /f /im gdb32.exe"); // 杀死之前运行的调试器进程
 
         if (!isMaskCmd) {
             this.runCmd(command);
             return;
         }
-        const [err] = await Avz.execute(command);
+        const [err] = await exec(command);
         if (err !== null) {
             vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
         } else {
@@ -234,7 +238,7 @@ export class Avz {
                 for (const idx of taskList) {
                     const srcFile = srcFiles[idx];
                     const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
-                    const [err] = await Avz.execute(command);
+                    const [err] = await exec(command);
                     if (err !== null) { // 继续编译
                         vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
                     }
@@ -278,7 +282,7 @@ export class Avz {
 
     public getPvzExePath(): string {
         const pvzExeName = vscode.workspace.getConfiguration().get<string>("avzConfigure.pvzExeName")!;
-        const output = execSync(`wmic process where name="${pvzExeName}" get ExecutablePath`, { encoding: "utf8" });
+        const output = execSync(`wmic process where name="${pvzExeName}" get ExecutablePath`);
         const exePath = output.split("\n")[1].trim();
         if (exePath === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
@@ -291,7 +295,7 @@ export class Avz {
 
     public getPvzProcessId(): string {
         const pvzExeName = vscode.workspace.getConfiguration().get<string>("avzConfigure.pvzExeName")!;
-        const output = execSync(`wmic process where name="${pvzExeName}" get ProcessId`, { encoding: "utf8" });
+        const output = execSync(`wmic process where name="${pvzExeName}" get ProcessId`);
         const pid = output.split("\n")[1].trim();
         if (pid === "") {
             vscode.window.showErrorMessage(vscode.l10n.t("PvZ is not activated!"));
@@ -362,7 +366,7 @@ export class Avz {
         this.refreshAvzVersion();
         let info = `AvZ ${this.envType} | ${this.avzVersion} | "${this.avzDir}"`;
         if (this.envType === 2) {
-            const cpu = execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`, { encoding: "utf8" }).split("-", 1)[0];
+            const cpu = execSync(`${this.avzDir}/MinGW/bin/g++ -dumpmachine`).split("-", 1)[0];
             info += " | " + cpu;
         }
         vscode.window.showInformationMessage(info);
