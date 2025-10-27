@@ -67,7 +67,7 @@ export class Avz {
         if (vscode.workspace.workspaceFolders) {
             return true;
         }
-        vscode.window.showErrorMessage(vscode.l10n.t("You must have the folder open to exec the AvZ command!"));
+        vscode.window.showErrorMessage(vscode.l10n.t("You must have the folder open to execute the AvZ command!"));
         return false;
     }
 
@@ -198,7 +198,7 @@ export class Avz {
         }
         const [err] = await exec(command);
         if (err) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script. ({error})", { error: err.message }));
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script ({error})", { error: err.message }));
         } else {
             vscode.window.showInformationMessage(vscode.l10n.t("Script was injected successfully."));
         }
@@ -240,7 +240,7 @@ export class Avz {
                     const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await exec(command);
                     if (err) { // 继续编译
-                        vscode.window.showWarningMessage(vscode.l10n.t("Failed to compile file \"{file}\". ({error})", { file: srcFile, error: err.message }));
+                        vscode.window.showWarningMessage(vscode.l10n.t('Failed to compile file "{file}" ({error})', { file: srcFile, error: err.message }));
                     }
                     const percent = Math.round((++finishCnt / srcFileCnt) * 100);
                     progress.report({
@@ -258,10 +258,9 @@ export class Avz {
 
             await Promise.all(taskTable.map(worker));
 
-            const libavzPath = this.avzDir + "/bin/libavz.a";
-            if (fs.existsSync(libavzPath)) {
-                fs.unlinkSync(libavzPath);
-            }
+            try {
+                fs.unlinkSync(this.avzDir + "/bin/libavz.a");
+            } catch { }
 
             execSync(templateStrs.getAvzPackCommand(this.avzDir)); // pack & clean
         };
@@ -274,7 +273,7 @@ export class Avz {
         vscode.window.withProgress(progressOptions, progressBuild).then(
             () => { vscode.window.showInformationMessage(vscode.l10n.t("AvZ was built successfully.")); },
             (reason: Error) => {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ. ({error})", { error: reason.message }));
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to build AvZ ({error})", { error: reason.message }));
             }
         );
     }
@@ -330,12 +329,31 @@ export class Avz {
         // 下载版本列表
         const avzVersionListUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/version.txt`;
         const avzVersionListPath = this.tmpDir + "/version.txt";
-        const avzVersion = await fileUtils.downloadToPick(avzVersionListUrl, avzVersionListPath, vscode.l10n.t("Select AvZ Version"), (version) => version.startsWith(`env${this.envType}`));
+        const avzVersion = await fileUtils.downloadToPick(
+            avzVersionListUrl,
+            avzVersionListPath,
+            vscode.l10n.t("Select AvZ Version"),
+            (version) => version.startsWith(`env${this.envType}`)
+        ).then(
+            (selection) => selection,
+            (err) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of AvZ versions ({error})", { error: (err as Error).message }));
+                return undefined;
+            }
+        );
+        if (!avzVersion) {
+            return;
+        }
 
         // 下载 AvZ 压缩包
         const avzFileUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/${avzVersion}`;
         const avzFilePath = this.tmpDir + "/avz.zip";
-        await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
+        try {
+            await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
+        } catch (e) {
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to download AvZ package ({error})", { error: (e as Error).message }));
+            return;
+        }
 
         execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
         vscode.window.showInformationMessage(vscode.l10n.t("AvZ was updated successfully."));
@@ -395,11 +413,29 @@ export class Avz {
 
         const extensionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/extension_list.txt`;
         const extensionListPath = this.tmpDir + "/extension_list.txt";
-        const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension"));
+        const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension")).then(
+            (selection) => selection,
+            (err) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extensions ({error})", { error: (err as Error).message }));
+                return undefined;
+            }
+        );
+        if (!fullName) {
+            return
+        }
 
         const versionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${fullName}/version.txt`;
         const versionListPath = this.tmpDir + "/version.txt";
-        const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version"));
+        const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version")).then(
+            (selection) => selection,
+            (err) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extension versions ({error})", { error: (err as Error).message }));
+                return undefined;
+            }
+        );
+        if (!version) {
+            return;
+        }
 
         await this.downloadAvzExtension(fullName, version, true);
     }
@@ -416,18 +452,25 @@ export class Avz {
         const extensionName = extensionFullName.split("/")[1];
         const hasInstalled = this.extensionInstalledList.has(extensionName);
         if (hasInstalled && !isForceInstall) {
-            vscode.window.showWarningMessage(vscode.l10n.t("You have already installed the extension \"{0}\", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you can't solve the problem, please contact the author of the extension.", extensionName));
+            vscode.window.showWarningMessage(vscode.l10n.t('You have already installed the extension "{0}", so it will not be installed again. If you encounter version compatibility issues, please manually install another version of the extension; if you cannot solve the problem, please contact the author of the extension.', extensionName));
             return;
         }
+
         const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
         const extensionUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionPath = this.tmpDir + "/extension.zip";
-        await fileUtils.downloadFile(extensionUrl, extensionPath, true);
+        try {
+            await fileUtils.downloadFile(extensionUrl, extensionPath, true);
+        } catch (e) {
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to download extension "{name}" ({error})', { name: extensionName, error: (e as Error).message }));
+            return;
+        }
+
         execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionPath}" -aoa -o"${this.avzDir}/inc"`);
         if (!hasInstalled) {
             this.extensionInstalledList.add(extensionName);
         }
-        vscode.window.showInformationMessage(vscode.l10n.t("Extension \"{0}\" was installed successfully.", extensionName));
+        vscode.window.showInformationMessage(vscode.l10n.t('Extension "{0}" was installed successfully.', extensionName));
 
         // 读取插件的依赖列表
         const lines = fileUtils.readFileLines(`${this.avzDir}/inc/${extensionName}/information.txt`);
@@ -436,7 +479,7 @@ export class Avz {
                 this.refreshAvzVersion();
                 const avzVersionNeeded = line.split(" ")[1];
                 if (!avzVersionNeeded.includes(this.avzVersion)) {
-                    vscode.window.showWarningMessage(vscode.l10n.t("The extension \"{0}\" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!", extensionName, avzVersionNeeded, this.avzVersion));
+                    vscode.window.showWarningMessage(vscode.l10n.t('The extension "{0}" you downloaded depends on AvZ version {1}, but the current AvZ version is {2}, which may cause an incompatibility issue!', extensionName, avzVersionNeeded, this.avzVersion));
                 }
             } else if (lineNum > 1) {
                 const [name, version] = line.split(" ");
@@ -444,7 +487,7 @@ export class Avz {
                 if (fullName) {
                     await this.downloadAvzExtension(fullName, version);
                 } else {
-                    vscode.window.showErrorMessage(vscode.l10n.t("Extension \"{0}\" not found.", name));
+                    vscode.window.showErrorMessage(vscode.l10n.t('Extension "{0}" not found.', name));
                 }
             }
         }

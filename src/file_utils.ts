@@ -39,17 +39,13 @@ export function writeFile(path: string, str: string, canOverwrite: boolean = tru
 }
 
 export function downloadFile(srcUrl: string, destPath: string, showProgress: boolean = false): Thenable<void> {
-    const showErrorMessage = (error: string) => {
-        vscode.window.showErrorMessage(vscode.l10n.t("Failed to download file \"{url}\". ({error})", { url: srcUrl, error: error }));
-    };
-
     const download = (progress?: vscode.Progress<{
         message?: string;
         increment?: number;
-    }>) => new Promise<void>(callback => {
+    }>) => new Promise<void>((resolve, reject) => {
         https.get(srcUrl, (res) => {
             if (res.statusCode !== 200) {
-                showErrorMessage(`${res.statusCode} ${res.statusMessage}`);
+                reject(new Error(`${res.statusCode} ${res.statusMessage}`));
                 res.resume(); // 丢弃数据以减少内存占用
                 return;
             }
@@ -67,16 +63,18 @@ export function downloadFile(srcUrl: string, destPath: string, showProgress: boo
                     });
                 }
             }
-            let file = fs.createWriteStream(destPath).on("finish", () => { callback(); });
-            pipeline(res, file, (err) => {
-                if (err !== null) {
-                    showErrorMessage(err.message);
-                    if (fs.existsSync(destPath)) {
-                        fs.unlinkSync(destPath);
-                    }
+            pipeline(res, fs.createWriteStream(destPath), (err) => {
+                if (!err) {
+                    resolve();
+                    return;
+                }
+                try {
+                    fs.unlinkSync(destPath);
+                } finally {
+                    reject(err);
                 }
             });
-        }).on("error", (err) => { showErrorMessage(err.message); });
+        }).on("error", (err) => { reject(err); });
     });
 
     if (!showProgress) {
@@ -89,21 +87,16 @@ export function downloadFile(srcUrl: string, destPath: string, showProgress: boo
     }, download);
 };
 
-export const downloadToPick = (
+export async function downloadToPick(
     srcUrl: string,
     destPath: string,
     title: string,
     pred?: (option: string) => boolean // 用于过滤选项的谓词
-) => new Promise<string>(callback => {
-    downloadFile(srcUrl, destPath).then(() => {
-        const options = readFileLines(destPath).filter(pred ?? (() => true));
-        if (options.length === 0) {
-            return;
-        }
-        vscode.window.showQuickPick(options, { title: title }).then(selection => {
-            if (selection) {
-                callback(selection);
-            }
-        });
-    });
-});
+): Promise<string | undefined> {
+    await downloadFile(srcUrl, destPath);
+    const options = readFileLines(destPath).filter(pred ?? (() => true));
+    if (options.length === 0) {
+        throw new Error("No valid options to select");
+    }
+    return vscode.window.showQuickPick(options, { title: title });
+};
