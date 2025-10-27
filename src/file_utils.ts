@@ -22,8 +22,8 @@ import * as https from 'https';
 import { pipeline } from 'stream';
 import * as vscode from 'vscode';
 
-export function mkdir(dirName: string): void {
-    fs.mkdirSync(dirName, { recursive: true });
+export function mkdir(path: string): void {
+    fs.mkdirSync(path, { recursive: true });
 }
 
 export const readFileLines = (path: string): string[] => fs.readFileSync(path, "utf8").trimEnd().replaceAll("\r", "").split("\n");

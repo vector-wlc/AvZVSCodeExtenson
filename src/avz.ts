@@ -239,8 +239,8 @@ export class Avz {
                     const srcFile = srcFiles[idx];
                     const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
                     const [err] = await exec(command);
-                    if (err) { // 继续编译
-                        vscode.window.showWarningMessage(vscode.l10n.t('Failed to compile file "{file}" ({error})', { file: srcFile, error: err.message }));
+                    if (err) {
+                        throw new Error(`Failed to compile "${srcFile}": ${err.message}`);
                     }
                     const percent = Math.round((++finishCnt / srcFileCnt) * 100);
                     progress.report({
@@ -355,6 +355,10 @@ export class Avz {
             return;
         }
 
+        await Promise.allSettled([
+            fs.promises.rm(this.avzDir + "/inc", { recursive: true, force: true }),
+            fs.promises.rm(this.avzDir + "/src", { recursive: true, force: true }),
+        ]);
         execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
         vscode.window.showInformationMessage(vscode.l10n.t("AvZ was updated successfully."));
         this.recommendClangd();

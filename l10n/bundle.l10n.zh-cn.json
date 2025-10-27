@@ -9,7 +9,6 @@
   "Failed to save the script file.": "保存脚本文件失败。",
   "Failed to run script ({error})": "运行脚本失败（{error}）",
   "Script was injected successfully.": "脚本成功运行！",
-  "Failed to compile file \"{file}\" ({error})": "编译文件 “{file}” 失败（{error}）",
   "AvZ library being compiled": "正在编译 AvZ 库",
   "AvZ was built successfully.": "AvZ 构建成功！",
   "Failed to build AvZ ({error})": "AvZ 构建失败（{error}）",

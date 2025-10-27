@@ -9,7 +9,6 @@
   "Failed to save the script file.": "儲存指令碼檔案失敗。",
   "Failed to run script ({error})": "執行指令碼失敗（{error}）",
   "Script was injected successfully.": "指令碼成功執行！",
-  "Failed to compile file \"{file}\" ({error})": "編譯檔案「{file}」失敗（{error}）",
   "AvZ library being compiled": "正在編譯 AvZ 庫",
   "AvZ was built successfully.": "AvZ 構建成功！",
   "Failed to build AvZ ({error})": "AvZ 構建失敗（{error}）",
