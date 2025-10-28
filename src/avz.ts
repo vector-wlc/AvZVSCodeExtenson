@@ -20,6 +20,7 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
+import * as util from 'util';
 import * as vscode from 'vscode';
 import * as fileUtils from './file_utils';
 import * as templateStrs from './template_strs';
@@ -28,16 +29,9 @@ type RepoType = "GitHub" | "GitLab" | "Gitee";
 
 const CLANGD_EXTENSION_ID = "llvm-vs-code-extensions.vscode-clangd";
 
-function exec(command: string): Promise<[error: Error | null, stdout: string]> {
-    return new Promise(callback => {
-        child_process.exec(command, (error, stdout) => { callback([error, stdout]); });
-    });
-}
+const exec = util.promisify(child_process.exec);
 
-function execSync(command: string): string {
-    return child_process.execSync(command, { encoding: "utf8" });
-}
-
+const execSync = (command: string): string => child_process.execSync(command, { encoding: "utf8" });
 
 export class Avz {
     private static readonly avzRepoUrl: Readonly<Record<RepoType, string>> = {
@@ -190,17 +184,19 @@ export class Avz {
             .replaceAll("__AVZ_DIR__", this.avzDir)
             .replaceAll("__FILE_NAME__", vscode.window.activeTextEditor.document.fileName);
 
-        await exec("taskkill /f /im gdb32.exe"); // 杀死之前运行的调试器进程
+        try {
+            await exec("taskkill /f /im gdb32.exe"); // 杀死之前运行的调试器进程
+        } catch { }
 
         if (!isMaskCmd) {
             this.runCmd(command);
             return;
         }
-        const [err] = await exec(command);
-        if (err) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script ({error})", { error: err.message }));
-        } else {
+        try {
+            await exec(command);
             vscode.window.showInformationMessage(vscode.l10n.t("Script was injected successfully."));
+        } catch (e) {
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script ({error})", { error: (e as Error).message }));
         }
     }
 
@@ -238,9 +234,10 @@ export class Avz {
                 for (const idx of taskList) {
                     const srcFile = srcFiles[idx];
                     const command = compileCmd.replaceAll("__FILE_NAME__", `${this.avzDir}/src/${srcFile}`);
-                    const [err] = await exec(command);
-                    if (err) {
-                        throw new Error(`Failed to compile "${srcFile}": ${err.message}`);
+                    try {
+                        await exec(command);
+                    } catch (e) {
+                        throw new Error(`Failed to compile "${srcFile}": ${(e as Error).message}`);
                     }
                     const percent = Math.round((++finishCnt / srcFileCnt) * 100);
                     progress.report({
@@ -262,7 +259,7 @@ export class Avz {
                 fs.unlinkSync(this.avzDir + "/bin/libavz.a");
             } catch { }
 
-            execSync(templateStrs.getAvzPackCommand(this.avzDir)); // pack & clean
+            await exec(templateStrs.getAvzPackCommand(this.avzDir)); // pack & clean
         };
 
         const progressOptions: vscode.ProgressOptions = {
@@ -336,8 +333,8 @@ export class Avz {
             (version) => version.startsWith(`env${this.envType}`)
         ).then(
             (selection) => selection,
-            (err) => {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of AvZ versions ({error})", { error: (err as Error).message }));
+            (err: Error) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of AvZ versions ({error})", { error: err.message }));
                 return undefined;
             }
         );
@@ -359,7 +356,7 @@ export class Avz {
             fs.promises.rm(this.avzDir + "/inc", { recursive: true, force: true }),
             fs.promises.rm(this.avzDir + "/src", { recursive: true, force: true }),
         ]);
-        execSync(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
+        await exec(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
         vscode.window.showInformationMessage(vscode.l10n.t("AvZ was updated successfully."));
         this.recommendClangd();
     }
@@ -419,8 +416,8 @@ export class Avz {
         const extensionListPath = this.tmpDir + "/extension_list.txt";
         const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension")).then(
             (selection) => selection,
-            (err) => {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extensions ({error})", { error: (err as Error).message }));
+            (err: Error) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extensions ({error})", { error: err.message }));
                 return undefined;
             }
         );
@@ -432,8 +429,8 @@ export class Avz {
         const versionListPath = this.tmpDir + "/version.txt";
         const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version")).then(
             (selection) => selection,
-            (err) => {
-                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extension versions ({error})", { error: (err as Error).message }));
+            (err: Error) => {
+                vscode.window.showErrorMessage(vscode.l10n.t("Failed to get the list of extension versions ({error})", { error: err.message }));
                 return undefined;
             }
         );
@@ -470,7 +467,7 @@ export class Avz {
             return;
         }
 
-        execSync(`"${this.avzDir}/7z/7z.exe" x "${extensionPath}" -aoa -o"${this.avzDir}/inc"`);
+        await exec(`"${this.avzDir}/7z/7z.exe" x "${extensionPath}" -aoa -o"${this.avzDir}/inc"`);
         if (!hasInstalled) {
             this.extensionInstalledList.add(extensionName);
         }
