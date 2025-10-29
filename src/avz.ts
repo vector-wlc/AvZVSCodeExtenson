@@ -171,7 +171,7 @@ export class Avz {
             vscode.window.showErrorMessage(vscode.l10n.t("Please open the script file that needs to be run"));
             return;
         }
-        if (!await vscode.window.activeTextEditor.document.save()) {
+        if (!(await vscode.window.activeTextEditor.document.save())) {
             vscode.window.showErrorMessage(vscode.l10n.t("Failed to save the script file."));
             return;
         }
