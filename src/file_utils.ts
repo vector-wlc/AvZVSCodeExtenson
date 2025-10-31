@@ -85,7 +85,7 @@ export function downloadFile(srcUrl: string, destPath: string, showProgress: boo
         title: vscode.l10n.t("Downloading"),
         cancellable: false
     }, download);
-};
+}
 
 export async function downloadToPick(
     srcUrl: string,
@@ -99,4 +99,4 @@ export async function downloadToPick(
         throw new Error("No valid options to select");
     }
     return vscode.window.showQuickPick(options, { title: title });
-};
+}

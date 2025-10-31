@@ -194,9 +194,9 @@ export class Avz {
         }
         try {
             await exec(command);
-            vscode.window.showInformationMessage(vscode.l10n.t("Script was injected successfully."));
+            vscode.window.showInformationMessage(vscode.l10n.t("Script was compiled successfully."));
         } catch (e) {
-            vscode.window.showErrorMessage(vscode.l10n.t("Failed to run script ({error})", { error: (e as Error).message }));
+            vscode.window.showErrorMessage(vscode.l10n.t("Failed to compile script ({error})", { error: (e as Error).message }));
         }
     }
 
