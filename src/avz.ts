@@ -17,7 +17,7 @@
  * AvZ VSCode Extension. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as child_process from 'child_process';
+import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as util from 'util';
@@ -29,9 +29,9 @@ type RepoType = "GitHub" | "GitLab" | "Gitee";
 
 const CLANGD_EXTENSION_ID = "llvm-vs-code-extensions.vscode-clangd";
 
-const exec = util.promisify(child_process.exec);
+const exec = util.promisify(childProcess.exec);
 
-const execSync = (command: string): string => child_process.execSync(command, { encoding: "utf8" });
+const execSync = (command: string): string => childProcess.execSync(command, { encoding: "utf8" });
 
 export class Avz {
     private static readonly avzRepoUrl: Readonly<Record<RepoType, string>> = {
