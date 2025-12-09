@@ -3,6 +3,7 @@
     "displayName": "AvZ",
     "description": "A VSCode extension for the PvZ TAS framework - AsmVsZombies.",
     "version": "0.7.4",
+    "type": "module",
     "engines": {
         "vscode": "^1.75.0"
     },
@@ -142,13 +143,13 @@
         "glob": "^11.0.3",
         "mocha": "^11.7.4",
         "typescript": "^5.9.3",
-        "vscode-test": "^1.6.1",
         "@types/glob": "^9.0.0",
         "@types/mocha": "^10.0.10",
         "@types/node": "^24.9.1",
         "@types/vscode": "^1.75.0",
         "@typescript-eslint/eslint-plugin": "^8.46.2",
         "@typescript-eslint/parser": "^8.46.2",
-        "@vscode/l10n-dev": "^0.0.35"
+        "@vscode/l10n-dev": "^0.0.35",
+        "@vscode/test-electron": "^2.5.2"
     }
 }
