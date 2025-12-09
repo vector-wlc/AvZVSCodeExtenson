@@ -108,11 +108,11 @@ BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
 `.trimStart();
 
-const flagsOfAvz1 = "-std=c++1z -Wno-sign-compare";
-const flagsOfAvz2 = "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result";
+const FLAGS_AVZ1 = "-std=c++1z -Wno-sign-compare";
+const FLAGS_AVZ2 = "-m32 -static -std=c++2b -fexperimental-library -Werror=return-type -Werror=unused-result";
 
 export function generateMetadataJson(_: string, envType: number): string {
-    const flag1 = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
+    const flag1 = envType === 1 ? FLAGS_AVZ1 : FLAGS_AVZ2;
     const flag2 = envType === 1 ? "" : "-ldbghelp";
     return JSON.stringify({
         compileOptions: `${flag1} __CUSTOM_ARGS__ "__FILE_NAME__" -isystem "__AVZ_DIR__/inc" -lavz -lgdi32 ${flag2} -L "__AVZ_DIR__/bin" -shared -o "bin/libavz.dll"`
@@ -120,7 +120,7 @@ export function generateMetadataJson(_: string, envType: number): string {
 }
 
 export function getAvzCompileCommand(avzDir: string, envType: number): string {
-    const flag = envType === 1 ? flagsOfAvz1 : flagsOfAvz2;
+    const flag = envType === 1 ? FLAGS_AVZ1 : FLAGS_AVZ2;
     return `set "PATH=${avzDir}/MinGW/bin;%PATH%" && "${avzDir}/MinGW/bin/g++" ${flag} __CUSTOM_ARGS__ -c "__FILE_NAME__" -isystem "${avzDir}/inc" -o "__FILE_NAME__.o"`;
 }
 
