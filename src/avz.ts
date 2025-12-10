@@ -34,16 +34,16 @@ const exec = util.promisify(childProcess.exec);
 const execSync = (command: string): string => childProcess.execSync(command, { encoding: "utf8" });
 
 export class Avz {
-    private static readonly avzRepoUrl: Readonly<Record<RepoType, string>> = {
-        "GitHub": "https://github.com/vector-wlc/AsmVsZombies/raw/master",
-        "GitLab": "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master",
-        "Gitee": "https://gitee.com/vector-wlc/AsmVsZombies/raw/master",
-    };
-    private static readonly extensionRepoUrl: Readonly<Record<RepoType, string>> = {
-        "GitHub": "https://github.com/qrmd0/AvZLib/raw/main",
-        "GitLab": "https://gitlab.com/avzlib/AvZLib/-/raw/main",
-        "Gitee": "https://gitee.com/qrmd/AvZLib/raw/main",
-    };
+    private static readonly avzRepoUrl: ReadonlyMap<RepoType, string> = new Map([
+        ["GitHub", "https://github.com/vector-wlc/AsmVsZombies/raw/master"],
+        ["GitLab", "https://gitlab.com/vector-wlc/AsmVsZombies/-/raw/master"],
+        ["Gitee", "https://gitee.com/vector-wlc/AsmVsZombies/raw/master"],
+    ]);
+    private static readonly extensionRepoUrl: ReadonlyMap<RepoType, string> = new Map([
+        ["GitHub", "https://github.com/qrmd0/AvZLib/raw/main"],
+        ["GitLab", "https://gitlab.com/avzlib/AvZLib/-/raw/main"],
+        ["Gitee", "https://gitee.com/qrmd/AvZLib/raw/main"],
+    ]);
 
     private readonly tmpDir: string = os.tmpdir() + "/AsmVsZombies";
     private avzDir = "";
@@ -324,7 +324,7 @@ export class Avz {
         const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
 
         // 下载版本列表
-        const avzVersionListUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/version.txt`;
+        const avzVersionListUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/version.txt`;
         const avzVersionListPath = this.tmpDir + "/version.txt";
         const avzVersion = await fileUtils.downloadToPick(
             avzVersionListUrl,
@@ -343,7 +343,7 @@ export class Avz {
         }
 
         // 下载 AvZ 压缩包
-        const avzFileUrl = `${Avz.avzRepoUrl[downloadSrc]}/release/${avzVersion}`;
+        const avzFileUrl = `${Avz.avzRepoUrl.get(downloadSrc)}/release/${avzVersion}`;
         const avzFilePath = this.tmpDir + "/avz.zip";
         try {
             await fileUtils.downloadFile(avzFileUrl, avzFilePath, true);
@@ -412,7 +412,7 @@ export class Avz {
         this.refreshExtensionList();
         const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
 
-        const extensionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/extension_list.txt`;
+        const extensionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/extension_list.txt`;
         const extensionListPath = this.tmpDir + "/extension_list.txt";
         const fullName = await fileUtils.downloadToPick(extensionListUrl, extensionListPath, vscode.l10n.t("Select Extension")).then(
             (selection) => selection,
@@ -425,7 +425,7 @@ export class Avz {
             return
         }
 
-        const versionListUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${fullName}/version.txt`;
+        const versionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
         const versionListPath = this.tmpDir + "/version.txt";
         const version = await fileUtils.downloadToPick(versionListUrl, versionListPath, vscode.l10n.t("Select Version")).then(
             (selection) => selection,
@@ -458,7 +458,7 @@ export class Avz {
         }
 
         const downloadSrc = vscode.workspace.getConfiguration().get<RepoType>("avzConfigure.downloadSource")!;
-        const extensionUrl = `${Avz.extensionRepoUrl[downloadSrc]}/${extensionFullName}/release/${extensionVersion}.zip`;
+        const extensionUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${extensionFullName}/release/${extensionVersion}.zip`;
         const extensionPath = this.tmpDir + "/extension.zip";
         try {
             await fileUtils.downloadFile(extensionUrl, extensionPath, true);
