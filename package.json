@@ -135,21 +135,22 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile && npm run lint",
-        "lint": "eslint src --ext ts",
+        "lint": "eslint src .",
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
-        "eslint": "^9.38.0",
-        "glob": "^11.0.3",
-        "mocha": "^11.7.4",
-        "typescript": "^5.9.3",
+        "@eslint/js": "^9.39.1",
         "@types/glob": "^9.0.0",
         "@types/mocha": "^10.0.10",
         "@types/node": "^24.9.1",
         "@types/vscode": "^1.75.0",
-        "@typescript-eslint/eslint-plugin": "^8.46.2",
-        "@typescript-eslint/parser": "^8.46.2",
         "@vscode/l10n-dev": "^0.0.35",
-        "@vscode/test-electron": "^2.5.2"
+        "@vscode/test-electron": "^2.5.2",
+        "eslint": "^9.39.1",
+        "glob": "^11.0.3",
+        "globals": "^16.5.0",
+        "mocha": "^11.7.4",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.49.0"
     }
 }
