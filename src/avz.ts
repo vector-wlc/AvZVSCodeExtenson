@@ -22,8 +22,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as util from 'util';
 import * as vscode from 'vscode';
-import * as fileUtils from './file_utils';
-import * as templateStrs from './template_strs';
+import * as fileUtils from './file_utils.js';
+import * as templateStrs from './template_strs.js';
 
 type RepoType = "GitHub" | "GitLab" | "Gitee";
 

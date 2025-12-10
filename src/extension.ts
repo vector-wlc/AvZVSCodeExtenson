@@ -18,7 +18,7 @@
  */
 
 import * as vscode from 'vscode';
-import { Avz } from './avz';
+import { Avz } from './avz.js';
 
 let avz = new Avz();
 
