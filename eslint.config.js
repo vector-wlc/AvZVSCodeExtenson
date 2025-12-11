@@ -1,4 +1,5 @@
 import { defineConfig } from "eslint/config";
+import stylisticTs from "@stylistic/eslint-plugin"
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 
@@ -6,6 +7,7 @@ export default defineConfig([{
     files: ["src/**/*.ts"],
 
     plugins: {
+        "@stylistic/ts": stylisticTs,
         "@typescript-eslint": typescriptEslint,
     },
 
@@ -16,6 +18,7 @@ export default defineConfig([{
     },
 
     rules: {
+        "@stylistic/ts/semi": "warn",
         "@typescript-eslint/naming-convention": [
             "warn",
             {

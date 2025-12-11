@@ -422,7 +422,7 @@ export class Avz {
             }
         );
         if (!fullName) {
-            return
+            return;
         }
 
         const versionListUrl = `${Avz.extensionRepoUrl.get(downloadSrc)}/${fullName}/version.txt`;
