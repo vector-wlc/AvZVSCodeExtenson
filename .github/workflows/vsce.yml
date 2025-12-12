@@ -1,4 +1,4 @@
-name: Visual Studio Code Extensions
+name: VS Code Extension CI
 
 on:
   push:
