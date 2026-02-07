@@ -98,7 +98,7 @@ export const generateTasksJson = (_1: string, _2: number) => `{
     "version": "2.0.0"
 }`;
 
-export const generateClangFormat = (_1: string, _2: number) => `
+export const generateClangFormat = (_1: string, envType: number) => `
 # AvZ 库的代码风格 (在格式化时使用)
 BasedOnStyle: WebKit
 AlignTrailingComments: true
@@ -106,6 +106,11 @@ Cpp11BracedListStyle: true
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: true
 SpaceInEmptyBlock: false
+${envType === 1 ? "" : `
+Macros:
+  - 'At(x)=_='
+  - 'Do=[]'
+  - 'CoDo=[]'`.trimStart()}
 `.trimStart();
 
 const FLAGS_AVZ1 = "-std=c++1z -Wno-sign-compare";
