@@ -46,7 +46,6 @@ module.exports = defineConfig([{
             {
                 selector: "import",
                 format: ["camelCase", "PascalCase"],
-                modifiers: ["default"],
             },
         ],
         curly: "warn",

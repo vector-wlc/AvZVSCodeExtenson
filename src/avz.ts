@@ -355,10 +355,12 @@ export class Avz {
             return;
         }
 
-        await Promise.allSettled([
-            fs.promises.rm(this.avzDir + "/inc", { recursive: true, force: true }),
-            fs.promises.rm(this.avzDir + "/src", { recursive: true, force: true }),
-        ]);
+        // TODO: 在不删除已安装的 AvZ 插件的情况下清除旧版本 AvZ 文件
+        // await Promise.allSettled([
+        //     fs.promises.rm(this.avzDir + "/inc", { recursive: true, force: true }),
+        //     fs.promises.rm(this.avzDir + "/src", { recursive: true, force: true }),
+        // ]);
+
         await exec(`"${this.avzDir}/7z/7z.exe" x "${avzFilePath}" -aoa -o"${this.avzDir}"`);
         vscode.window.showInformationMessage(vscode.l10n.t("AvZ was updated successfully."));
         this.recommendClangd();
