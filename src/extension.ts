@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2025 AsmVsZombies Team
+ * Copyright (C) 2021-2026 AsmVsZombies Team
  *
  * This file is part of AvZ VSCode Extension.
  *
