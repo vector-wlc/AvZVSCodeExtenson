@@ -1,9 +1,9 @@
-import { defineConfig } from "eslint/config";
-import stylisticTs from "@stylistic/eslint-plugin"
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
+const { defineConfig } = require("eslint/config");
+const stylisticTs = require("@stylistic/eslint-plugin");
+const typescriptEslint = require("@typescript-eslint/eslint-plugin");
+const tsParser = require("@typescript-eslint/parser");
 
-export default defineConfig([{
+module.exports = defineConfig([{
     files: ["src/**/*.ts"],
 
     plugins: {
