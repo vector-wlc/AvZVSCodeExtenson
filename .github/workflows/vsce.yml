@@ -10,7 +10,7 @@ jobs:
  
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7
 
     - name: Install dependencies
       run: |
@@ -21,7 +21,7 @@ jobs:
       run: npx @vscode/vsce package
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       with:
         name: avz-vsce
         path: '*.vsix'
