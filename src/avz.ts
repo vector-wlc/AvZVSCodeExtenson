@@ -333,7 +333,7 @@ export class Avz {
             avzVersionListUrl,
             avzVersionListPath,
             vscode.l10n.t("Select AvZ Version"),
-            (version) => version.startsWith(`env${this.envType}`)
+            (version) => version.startsWith(`env${this.envType}/`)
         ).then(
             (selection) => selection,
             (err: Error) => {
